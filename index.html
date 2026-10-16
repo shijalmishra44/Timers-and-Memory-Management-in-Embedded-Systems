@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timers &amp; Memory Management in Embedded Systems | Interactive Learning Module</title>
+<style>
+:root{
+  --navy:#0f2b46;
+  --blue:#1f4e79;
+  --sky:#2e86c1;
+  --accent:#e67e22;
+  --green:#1e8449;
+  --red:#c0392b;
+  --bg:#f4f7fa;
+  --card:#ffffff;
+  --line:#d6e0ea;
+  --txt:#1c2833;
+  --muted:#5d6d7e;
+  --mono:"Consolas","Courier New",monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:"Segoe UI",Roboto,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--txt);
+  line-height:1.65;
+  font-size:16px;
+}
+header.masthead{
+  background:linear-gradient(135deg,#0f2b46 0%,#1f4e79 55%,#2e86c1 100%);
+  color:#fff;
+  padding:28px 20px 22px;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px;}
+header.masthead h1{margin:0 0 6px;font-size:1.75rem;letter-spacing:.3px;}
+header.masthead .sub{opacity:.92;font-size:1rem;margin-bottom:12px;}
+.tagrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px;}
+.tag{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);
+  padding:3px 11px;border-radius:14px;font-size:.8rem;letter-spacing:.3px;}
+.objbox{background:rgba(255,255,255,.10);border-left:4px solid var(--accent);
+  padding:12px 16px;border-radius:8px;}
+.objbox h3{margin:0 0 6px;font-size:.98rem;text-transform:uppercase;letter-spacing:1px;color:#ffd9a8;}
+.objbox ul{margin:0;padding-left:20px;font-size:.92rem;}
+.objbox li{margin:2px 0;}
+nav.mainnav{
+  position:sticky;top:0;z-index:50;
+  background:#0b2239;border-bottom:3px solid var(--accent);
+  overflow-x:auto;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+nav.mainnav a{
+  display:inline-block;color:#dbe9f5;text-decoration:none;
+  padding:11px 14px;font-size:.86rem;font-weight:600;letter-spacing:.2px;
+  border-bottom:3px solid transparent;
+}
+nav.mainnav a:hover{background:#123b5e;color:#fff;border-bottom-color:var(--accent);}
+main{max-width:1180px;margin:0 auto;padding:22px 16px 70px;}
+section{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:22px 24px;margin:0 0 24px;
+  box-shadow:0 2px 8px rgba(15,43,70,.06);
+}
+section h2{
+  margin:0 0 14px;font-size:1.32rem;color:var(--blue);
+  border-left:6px solid var(--accent);padding-left:12px;letter-spacing:.2px;
+}
+section h3{color:var(--navy);font-size:1.06rem;margin:20px 0 8px;}
+section h4{color:var(--blue);font-size:.96rem;margin:16px 0 6px;}
+p{margin:9px 0;}
+ul,ol{margin:8px 0 8px 4px;padding-left:22px;}
+li{margin:4px 0;}
+code{font-family:var(--mono);background:#eef3f8;padding:1px 5px;border-radius:4px;font-size:.9em;color:#0f2b46;}
+pre{background:#0f2b46;color:#e8f2fb;padding:14px 16px;border-radius:9px;overflow-x:auto;
+  font-family:var(--mono);font-size:.85rem;line-height:1.5;}
+.eq{
+  background:#eef6fc;border-left:4px solid var(--sky);
+  padding:10px 16px;margin:12px 0;border-radius:6px;
+  font-family:var(--mono);font-size:1.0rem;overflow-x:auto;color:#0f2b46;
+}
+.eq b{color:#b34700;}
+.note{
+  background:#fff8e8;border-left:4px solid var(--accent);
+  padding:10px 16px;border-radius:6px;margin:12px 0;font-size:.94rem;
+}
+.warn{
+  background:#fdecea;border-left:4px solid var(--red);
+  padding:10px 16px;border-radius:6px;margin:12px 0;font-size:.94rem;
+}
+.ok{
+  background:#eafaf0;border-left:4px solid var(--green);
+  padding:10px 16px;border-radius:6px;margin:12px 0;font-size:.94rem;
+}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top;}
+th{background:#e8f1f9;color:var(--navy);font-weight:700;}
+tr:nth-child(even) td{background:#fafcfe;}
+.tablewrap{overflow-x:auto;}
+figure{margin:18px 0;text-align:center;}
+figure svg{max-width:100%;height:auto;background:#fbfdff;border:1px solid var(--line);border-radius:10px;}
+figcaption{font-size:.86rem;color:var(--muted);margin-top:8px;font-style:italic;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr;}}
+.mini{background:#f7fafd;border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
+.mini h4{margin-top:0;}
+details.qa{
+  background:#f7fafd;border:1px solid var(--line);border-left:4px solid var(--sky);
+  border-radius:8px;margin:9px 0;padding:0 14px;
+}
+details.qa[open]{border-left-color:var(--accent);background:#fdfaf5;}
+details.qa summary{
+  cursor:pointer;padding:11px 0;font-weight:600;color:var(--navy);list-style:none;
+  display:flex;gap:10px;align-items:flex-start;
+}
+details.qa summary::-webkit-details-marker{display:none;}
+details.qa summary::before{content:"▶";color:var(--accent);font-size:.75rem;margin-top:6px;transition:.2s;}
+details.qa[open] summary::before{transform:rotate(90deg);}
+details.qa .ans{padding:0 0 14px 22px;font-size:.93rem;}
+.badge{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:11px;
+  text-transform:uppercase;letter-spacing:.6px;vertical-align:middle;}
+.badge.easy{background:#d5f5e3;color:#145a32;}
+.badge.moderate{background:#fdebd0;color:#935116;}
+.badge.difficult{background:#fadbd8;color:#922b21;}
+.qcard{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:14px 0;background:#fff;transition:.2s;}
+.qcard.correct{border-color:#58d68d;background:#f2fdf6;}
+.qcard.wrong{border-color:#ec7063;background:#fef5f4;}
+.qcard.skipped{border-color:#f7c948;background:#fffdf3;}
+.qtext{font-weight:600;margin:0 0 8px;font-size:.95rem;}
+.qnum{color:var(--blue);}
+.opts{display:flex;flex-direction:column;gap:5px;}
+.opt{display:flex;gap:9px;align-items:flex-start;padding:6px 9px;border-radius:7px;
+  cursor:pointer;font-size:.92rem;border:1px solid transparent;}
+.opt:hover{background:#eef6fc;}
+.opt input{margin-top:4px;accent-color:var(--blue);}
+.expl{display:none;margin-top:10px;padding:10px 13px;border-radius:7px;
+  background:#eef6fc;font-size:.88rem;border-left:4px solid var(--sky);}
+.btn{
+  background:var(--blue);color:#fff;border:none;border-radius:8px;
+  padding:10px 20px;font-size:.92rem;font-weight:600;cursor:pointer;
+  margin:6px 8px 6px 0;transition:.18s;letter-spacing:.3px;
+}
+.btn:hover{background:#153a5c;transform:translateY(-1px);}
+.btn.alt{background:var(--accent);}
+.btn.alt:hover{background:#c9660f;}
+.btn.ghost{background:#fff;color:var(--blue);border:2px solid var(--blue);}
+.btn.ghost:hover{background:#eef6fc;}
+.scorebox{
+  margin-top:12px;padding:13px 18px;border-radius:9px;background:#0f2b46;color:#fff;
+  font-size:1rem;font-weight:600;display:none;
+}
+.scorebox.show{display:block;}
+.calc{background:#f7fafd;border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0;}
+.calc label{display:block;font-size:.85rem;font-weight:600;color:var(--navy);margin-bottom:3px;}
+.calc input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;
+  font-family:var(--mono);font-size:.92rem;margin-bottom:10px;}
+.calcgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media(max-width:640px){.calcgrid{grid-template-columns:1fr;}}
+.result{background:#0f2b46;color:#e8f2fb;border-radius:8px;padding:12px 16px;
+  font-family:var(--mono);font-size:.88rem;margin-top:8px;line-height:1.9;}
+.result span{color:#ffd9a8;}
+footer.foot{
+  background:#0b2239;color:#c9dcec;padding:26px 16px;font-size:.86rem;text-align:center;
+}
+footer.foot strong{color:#fff;}
+.pill{display:inline-block;background:#e8f1f9;color:var(--blue);border-radius:12px;
+  padding:2px 10px;font-size:.78rem;font-weight:600;margin:2px 4px 2px 0;}
+hr.soft{border:none;border-top:1px dashed var(--line);margin:18px 0;}
+@media print{
+  nav.mainnav,.no-print{display:none !important;}
+  body{background:#fff;font-size:11.5pt;}
+  header.masthead{background:#0f2b46 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  section{box-shadow:none;border:1px solid #999;page-break-inside:avoid;margin-bottom:12px;}
+  .expl{display:block !important;}
+  details.qa .ans{display:block !important;}
+  details.qa{border-left:3px solid #666;}
+  a{text-decoration:none;color:#000;}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <h1>Timers &amp; Memory Management in Embedded Systems</h1>
+    <div class="sub">Subject: Embedded Systems &nbsp;•&nbsp; Unit: On-Chip Peripherals &amp; System Resources &nbsp;•&nbsp; Level: B.E./B.Tech ECE</div>
+    <div class="tagrow">
+      <span class="tag">Hardware Timers</span>
+      <span class="tag">PWM</span>
+      <span class="tag">Input Capture</span>
+      <span class="tag">Watchdog</span>
+      <span class="tag">Stack / Heap</span>
+      <span class="tag">Linker Sections</span>
+      <span class="tag">GATE</span>
+      <span class="tag">Core Company Interviews</span>
+    </div>
+    <div class="objbox">
+      <h3>Learning Objectives</h3>
+      <ul>
+        <li>Explain the architecture and register-level operation of a hardware timer (prescaler, counter, ARR, CCR).</li>
+        <li>Derive and apply timing equations for delays, periodic interrupts, PWM frequency/duty and input capture.</li>
+        <li>Describe the embedded memory map: <code>.text</code>, <code>.rodata</code>, <code>.data</code>, <code>.bss</code>, heap and stack.</li>
+        <li>Compare static vs dynamic memory allocation and justify deterministic allocation in safety-critical firmware.</li>
+        <li>Analyse stack sizing, heap fragmentation, and memory-overflow failure modes with quantitative methods.</li>
+        <li>Solve GATE-style numerical problems and answer core-company interview questions on both topics.</li>
+      </ul>
+    </div>
+  </div>
+</header>
+
+<nav class="mainnav">
+  <div class="wrap" style="padding:0;">
+    <a href="#intro">1. Introduction</a>
+    <a href="#basics">2. Fundamentals</a>
+    <a href="#diagram">3. Diagrams</a>
+    <a href="#working">4. Working Principle</a>
+    <a href="#waveforms">5. Waveforms</a>
+    <a href="#math">6. Equations</a>
+    <a href="#numericals">7. Solved Numericals</a>
+    <a href="#gate">8. GATE Prep</a>
+    <a href="#interview">9. Interview Prep</a>
+    <a href="#applications">10. Applications</a>
+    <a href="#quiz">11. Topic Quiz</a>
+    <a href="#revision">12. Revision</a>
+    <a href="#deliverables">13. Notes</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ================= 1. INTRODUCTION ================= -->
+<section id="intro">
+  <h2>1. Introduction &amp; Scope</h2>
+
+  <h3>1.1 What is an embedded timer?</h3>
+  <p>A <strong>timer</strong> is a hardware peripheral containing a free-running or programmable binary
+  counter that is driven by a (typically prescaled) clock derived from the system clock or an
+  external source. Because the counter is implemented in silicon, it counts deterministically and
+  independently of the CPU, which makes it the fundamental building block for
+  <em>timing, event counting, waveform generation and time measurement</em> in every
+  microcontroller — from an 8-bit 8051 to a 32-bit ARM Cortex-M7.</p>
+
+  <h3>1.2 What is memory management in an embedded system?</h3>
+  <p><strong>Memory management</strong> in embedded firmware is the disciplined partitioning and
+  lifetime control of the limited on-chip memory resources: non-volatile program memory (Flash),
+  volatile data memory (SRAM), and non-volatile data storage (EEPROM/emulated EEPROM). It covers
+  the <em>linker-defined memory map</em>, the <em>stack</em>, the <em>heap</em>, static/global storage,
+  memory pools, and the runtime policies (allocation, protection, monitoring, recovery) that keep
+  the firmware deterministic and safe.</p>
+
+  <h3>1.3 Why these two topics are studied together</h3>
+  <p>They are tightly coupled in real firmware:</p>
+  <ul>
+    <li>The <strong>RTOS tick</strong> is generated by a hardware timer (SysTick / TIMx); that tick drives
+      every task delay, timeout and time-slice — i.e., the timer is the heartbeat of the scheduler.</li>
+    <li>Every timer <strong>interrupt service routine</strong> consumes stack. A too-small stack plus a
+      high-frequency timer ISR is the classic cause of random resets in the field.</li>
+    <li>Buffer management (DMA rings, communication buffers, memory pools) is usually driven by
+      timer-triggered sampling and transmission events.</li>
+    <li>Both are favourite areas for <strong>GATE</strong> numericals and <strong>core-company</strong> interview
+      questions because they expose whether a candidate truly understands hardware–software interaction.</li>
+  </ul>
+
+  <h3>1.4 Prerequisite concepts</h3>
+  <div class="grid2">
+    <div class="mini">
+      <h4>For timers</h4>
+      <ul>
+        <li>Clock sources, crystal oscillators and PLL frequency multiplication</li>
+        <li>Binary/BCD counters and flip-flop based counting</li>
+        <li>Interrupts, NVIC, interrupt latency and priority</li>
+        <li>Number systems, hexadecimal and register bit-fields</li>
+      </ul>
+    </div>
+    <div class="mini">
+      <h4>For memory management</h4>
+      <ul>
+        <li>C pointers, arrays and pointer arithmetic</li>
+        <li>Storage classes: <code>auto</code>, <code>static</code>, <code>extern</code>, <code>volatile</code>, <code>const</code></li>
+        <li>Compilation &amp; linking: object files, symbol table, linker script</li>
+        <li>Von-Neumann vs Harvard architecture, memory-mapped I/O</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>1.5 Important terminology</h3>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td><strong>Prescaler (PSC)</strong></td><td>Programmable divider that reduces the input clock before it reaches the counter: f<sub>tick</sub> = f<sub>clk</sub>/(PSC+1).</td></tr>
+    <tr><td><strong>CNT</strong></td><td>The counter register; increments (or decrements) once per timer tick.</td></tr>
+    <tr><td><strong>ARR (Auto-Reload Register)</strong></td><td>Defines the counter period; when CNT reaches ARR an <em>update event</em> occurs and CNT reloads.</td></tr>
+    <tr><td><strong>CCR (Capture/Compare Register)</strong></td><td>In output-compare/PWM mode it sets the duty; in input-capture mode it stores the captured CNT value.</td></tr>
+    <tr><td><strong>Update event / Overflow</strong></td><td>The period-boundary event that can generate an interrupt, DMA request or trigger.</td></tr>
+    <tr><td><strong>PWM</strong></td><td>Pulse-Width Modulation: a square wave whose duty cycle is varied to control average power/voltage.</td></tr>
+    <tr><td><strong>Input Capture</strong></td><td>Hardware that latches CNT into CCR on an external edge, enabling precise period/pulse-width measurement.</td></tr>
+    <tr><td><strong>Watchdog Timer (WDT)</strong></td><td>An independent timer that resets the MCU if firmware fails to "kick" it within the timeout window.</td></tr>
+    <tr><td><strong>SysTick</strong></td><td>A 24-bit down-counter present in every ARM Cortex-M core, used for the RTOS tick or a 1 ms time base.</td></tr>
+    <tr><td><strong>.text / .rodata</strong></td><td>Executable code / read-only constants, placed in Flash.</td></tr>
+    <tr><td><strong>.data / .bss</strong></td><td>Initialised globals &amp; statics / zero-initialised globals &amp; statics, placed in RAM.</td></tr>
+    <tr><td><strong>Heap</strong></td><td>Region used by dynamic allocation (<code>malloc</code>/<code>free</code>); grows upward on ARM Cortex-M.</td></tr>
+    <tr><td><strong>Stack</strong></td><td>LIFO region for function frames, locals and interrupt context; grows <em>downward</em> on Cortex-M.</td></tr>
+    <tr><td><strong>Fragmentation</strong></td><td>Free memory exists but is split into blocks too small to satisfy a request.</td></tr>
+    <tr><td><strong>Memory pool</strong></td><td>A fixed set of equal-sized blocks allocated/freed in O(1) with no fragmentation.</td></tr>
+  </table>
+  </div>
+
+  <h3>1.6 Classification</h3>
+  <div class="grid2">
+    <div class="mini">
+      <h4>Classification of timers</h4>
+      <ul>
+        <li><strong>By counting direction:</strong> up-counter, down-counter, up/down (centre-aligned)</li>
+        <li><strong>By width:</strong> 8-bit, 16-bit (most common), 24-bit (SysTick), 32-bit</li>
+        <li><strong>By function:</strong> basic time-base, general-purpose, advanced-control (complementary outputs + dead-time), watchdog (IWDG/WWDG), RTC</li>
+        <li><strong>By clock source:</strong> internal APB clock, external event counter, external clock input</li>
+        <li><strong>By implementation:</strong> hardware timer vs software (loop) delay vs RTOS software timer</li>
+      </ul>
+    </div>
+    <div class="mini">
+      <h4>Classification of memory in an MCU</h4>
+      <ul>
+        <li><strong>Program memory:</strong> on-chip Flash, ROM, OTP</li>
+        <li><strong>Data memory:</strong> SRAM (DTCM, CCM, AHB-SRAM), external SDRAM/PSRAM</li>
+        <li><strong>Non-volatile data:</strong> EEPROM, emulated EEPROM in Flash, FRAM</li>
+        <li><strong>Allocation class:</strong> static (link-time) vs automatic (stack) vs dynamic (heap)</li>
+        <li><strong>By access:</strong> CPU-only, DMA-accessible, cacheable/non-cacheable</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 2. FUNDAMENTALS ================= -->
+<section id="basics">
+  <h2>2. Fundamental Operating Principle</h2>
+
+  <h3>2.1 The timer chain</h3>
+  <p>Every general-purpose timer follows the same signal chain:</p>
+  <div class="eq">
+    f<sub>clk</sub> &nbsp;→&nbsp; <b>Prescaler</b> (÷ N = PSC+1) &nbsp;→&nbsp; f<sub>tick</sub> &nbsp;→&nbsp; <b>Counter CNT</b> (0 … ARR) &nbsp;→&nbsp; <b>Update / Compare / Capture</b>
+  </div>
+  <p>The counter advances by one count for every timer tick. When CNT passes ARR it wraps around
+  and sets the <em>update flag</em> (UIF), which can raise an interrupt or a DMA request. If a
+  compare value CCR is programmed, a compare event occurs when CNT = CCR, and the output pin can
+  be set, cleared or toggled — this is precisely how PWM is generated.</p>
+
+  <h3>2.2 The three canonical timer jobs</h3>
+  <ol>
+    <li><strong>Time base / periodic interrupt:</strong> count a known time and interrupt the CPU
+      (RTOS tick, ADC sampling trigger, software debounce tick).</li>
+    <li><strong>Waveform generation (output compare / PWM):</strong> produce a precise square wave whose
+      frequency and duty are set by ARR and CCR (motor drive, LED dimming, servo control, class-D audio).</li>
+    <li><strong>Waveform measurement (input capture):</strong> latch the counter on external edges to measure
+      pulse width, period, frequency, duty cycle, or to decode a rotary encoder.</li>
+  </ol>
+
+  <h3>2.3 The embedded memory model</h3>
+  <p>At link time the toolchain splits the program into <em>sections</em> and places them according to a
+  <strong>linker script</strong> (GNU LD) or <strong>scatter file</strong> (ARM Compiler):</p>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Section</th><th>Contents</th><th>Typical location</th><th>Volatile?</th></tr>
+    <tr><td><code>.text</code></td><td>Executable instructions</td><td>Flash / ROM</td><td>No</td></tr>
+    <tr><td><code>.rodata</code></td><td>String literals, <code>const</code> tables, lookup tables</td><td>Flash / ROM</td><td>No</td></tr>
+    <tr><td><code>.data</code></td><td>Initialised global/static variables (<code>int x = 5;</code>)</td><td>RAM (init values stored in Flash and copied at startup)</td><td>Yes</td></tr>
+    <tr><td><code>.bss</code></td><td>Uninitialised/zero-initialised globals &amp; statics (<code>int x;</code>)</td><td>RAM (zeroed at startup)</td><td>Yes</td></tr>
+    <tr><td><strong>Heap</strong></td><td><code>malloc</code>/<code>calloc</code>/<code>realloc</code> blocks</td><td>RAM, grows upward</td><td>Yes</td></tr>
+    <tr><td><strong>Stack</strong></td><td>Function frames, locals, saved registers, ISR context</td><td>Top of RAM, grows downward</td><td>Yes</td></tr>
+  </table>
+  </div>
+
+  <div class="note">
+    <strong>Key insight:</strong> <code>.data</code> costs <em>twice</em> — it occupies Flash (to store the
+    initial value) <em>and</em> RAM (for the live variable). A large initialised constant table declared
+    without <code>const</code> can therefore silently consume both Flash and precious SRAM.
+  </div>
+
+  <h3>2.4 Startup sequence (what happens before <code>main()</code>)</h3>
+  <ol>
+    <li>Reset vector fetches the initial stack pointer (MSP) from address 0x0000_0000.</li>
+    <li>Startup code copies the <code>.data</code> initialisers from Flash to RAM.</li>
+    <li>Startup code zeroes the entire <code>.bss</code> region.</li>
+    <li>Heap and stack pointers (<code>_end</code>, <code>__initial_sp</code>) are set from the linker symbols.</li>
+    <li>System clock / PLL is configured; <code>main()</code> is called.</li>
+  </ol>
+  <p>If the linker script is wrong, this sequence corrupts memory before the first line of application
+  code ever runs — a very common source of "it works on the dev board but not on my custom PCB" bugs.</p>
+</section>
+
+<!-- ================= 3. DIAGRAMS ================= -->
+<section id="diagram">
+  <h2>3. Circuit / Block Diagrams</h2>
+
+  <h3>3.1 General-purpose timer block diagram</h3>
+  <figure>
+    <svg viewBox="0 0 820 340" role="img" aria-label="Timer block diagram">
+      <defs>
+        <marker id="arw" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L9,3 L0,6 z" fill="#1f4e79"/>
+        </marker>
+      </defs>
+      <rect x="0" y="0" width="820" height="340" fill="#fbfdff"/>
+      <!-- clock -->
+      <rect x="15" y="140" width="130" height="60" rx="8" fill="#e8f1f9" stroke="#1f4e79" stroke-width="2"/>
+      <text x="80" y="165" text-anchor="middle" font-size="13" font-weight="700" fill="#0f2b46">Clock source</text>
+      <text x="80" y="184" text-anchor="middle" font-size="12" fill="#1f4e79">f_clk (PLL/APB)</text>
+      <line x1="145" y1="170" x2="183" y2="170" stroke="#1f4e79" stroke-width="2" marker-end="url(#arw)"/>
+      <!-- prescaler -->
+      <rect x="185" y="140" width="130" height="60" rx="8" fill="#e8f1f9" stroke="#1f4e79" stroke-width="2"/>
+      <text x="250" y="165" text-anchor="middle" font-size="13" font-weight="700" fill="#0f2b46">Prescaler</text>
+      <text x="250" y="184" text-anchor="middle" font-size="12" fill="#1f4e79">÷ (PSC + 1)</text>
+      <line x1="315" y1="170" x2="353" y2="170" stroke="#1f4e79" stroke-width="2" marker-end="url(#arw)"/>
+      <text x="334" y="160" text-anchor="middle" font-size="10" fill="#c0392b">f_tick</text>
+      <!-- counter -->
+      <rect x="355" y="140" width="130" height="60" rx="8" fill="#d6eaf8" stroke="#1f4e79" stroke-width="2.5"/>
+      <text x="420" y="165" text-anchor="middle" font-size="13" font-weight="700" fill="#0f2b46">Counter CNT</text>
+      <text x="420" y="184" text-anchor="middle" font-size="12" fill="#1f4e79">up / down</text>
+      <!-- ARR -->
+      <rect x="355" y="35" width="130" height="50" rx="8" fill="#fdebd0" stroke="#e67e22" stroke-width="2"/>
+      <text x="420" y="56" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7e4a06">Auto-Reload ARR</text>
+      <text x="420" y="73" text-anchor="middle" font-size="11" fill="#935116">sets the period</text>
+      <line x1="420" y1="85" x2="420" y2="138" stroke="#e67e22" stroke-width="2" marker-end="url(#arw)"/>
+      <!-- CCR -->
+      <rect x="355" y="255" width="130" height="50" rx="8" fill="#d5f5e3" stroke="#1e8449" stroke-width="2"/>
+      <text x="420" y="276" text-anchor="middle" font-size="12.5" font-weight="700" fill="#145a32">Compare/Capture CCR</text>
+      <text x="420" y="293" text-anchor="middle" font-size="11" fill="#1e8449">duty / latched value</text>
+      <line x1="420" y1="200" x2="420" y2="253" stroke="#1e8449" stroke-width="2" marker-end="url(#arw)"/>
+      <!-- outputs -->
+      <rect x="560" y="32" width="240" height="56" rx="8" fill="#eef6fc" stroke="#2e86c1" stroke-width="1.8"/>
+      <text x="680" y="55" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0f2b46">Update / Overflow event</text>
+      <text x="680" y="73" text-anchor="middle" font-size="11" fill="#1f4e79">→ Interrupt / DMA / trigger</text>
+
+      <rect x="560" y="142" width="240" height="56" rx="8" fill="#eef6fc" stroke="#2e86c1" stroke-width="1.8"/>
+      <text x="680" y="165" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0f2b46">PWM / Output Compare</text>
+      <text x="680" y="183" text-anchor="middle" font-size="11" fill="#1f4e79">→ timer output pin</text>
+
+      <rect x="560" y="252" width="240" height="56" rx="8" fill="#eef6fc" stroke="#2e86c1" stroke-width="1.8"/>
+      <text x="680" y="275" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0f2b46">Input Capture</text>
+      <text x="680" y="293" text-anchor="middle" font-size="11" fill="#1f4e79">← external edge latches CNT</text>
+
+      <line x1="485" y1="170" x2="522" y2="170" stroke="#1f4e79" stroke-width="2"/>
+      <line x1="522" y1="60" x2="522" y2="280" stroke="#1f4e79" stroke-width="2"/>
+      <line x1="522" y1="60" x2="558" y2="60" stroke="#1f4e79" stroke-width="2" marker-end="url(#arw)"/>
+      <line x1="522" y1="170" x2="558" y2="170" stroke="#1f4e79" stroke-width="2" marker-end="url(#arw)"/>
+      <line x1="522" y1="280" x2="558" y2="280" stroke="#1f4e79" stroke-width="2" marker-end="url(#arw)"/>
+    </svg>
+    <figcaption>Figure 1 — Generic timer block diagram. The prescaler divides the peripheral clock;
+    the counter compares against ARR (period) and CCR (duty/capture). Update, compare and capture
+    events drive interrupts, DMA and output pins. <em>Illustrative diagram (SVG).</em></figcaption>
+  </figure>
+
+  <h3>3.2 Register/functional-block reference</h3>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Block / Register</th><th>Function</th><th>Design note</th></tr>
+    <tr><td>PSC (Prescaler)</td><td>Divides f<sub>clk</sub> by (PSC+1)</td><td>Larger PSC → longer range, coarser resolution</td></tr>
+    <tr><td>CNT (Counter)</td><td>Accumulates timer ticks</td><td>Readable at runtime for fine time-stamping</td></tr>
+    <tr><td>ARR (Auto-Reload)</td><td>Defines counter wrap value / PWM period</td><td>Buffered (shadow) register prevents glitches mid-period</td></tr>
+    <tr><td>CCR1…CCRn</td><td>Compare value (PWM duty) or captured count</td><td>Preload enable gives glitch-free duty updates</td></tr>
+    <tr><td>SR (Status)</td><td>UIF, CC1IF, CC2IF… flags</td><td>Must be cleared in the ISR to avoid re-entry storms</td></tr>
+    <tr><td>DIER / IER</td><td>Interrupt &amp; DMA enable bits</td><td>Enable only the events you service</td></tr>
+    <tr><td>CR1 / CR2</td><td>Enable, direction, alignment, clock division</td><td>CEN bit starts/stops the counter</td></tr>
+    <tr><td>EGR</td><td>Software event generation (UG bit)</td><td>Useful to preload PSC/ARR before start</td></tr>
+  </table>
+  </div>
+
+  <h3>3.3 MCU memory map (linker view)</h3>
+  <figure>
+    <svg viewBox="0 0 820 470" role="img" aria-label="MCU memory map">
+      <rect x="0" y="0" width="820" height="470" fill="#fbfdff"/>
+      <text x="215" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#0f2b46">FLASH (non-volatile)</text>
+      <text x="565" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#0f2b46">SRAM (volatile)</text>
+
+      <!-- Flash bar -->
+      <rect x="90" y="60" width="250" height="360" fill="#eef3f8" stroke="#1f4e79" stroke-width="2"/>
+      <rect x="90" y="60" width="250" height="110" fill="#d6eaf8" stroke="#1f4e79"/>
+      <text x="215" y="110" text-anchor="middle" font-size="13" font-weight="700" fill="#0f2b46">.text</text>
+      <text x="215" y="130" text-anchor="middle" font-size="11" fill="#1f4e79">executable code</text>
+
+      <rect x="90" y="170" width="250" height="80" fill="#d5f5e3" stroke="#1f4e79"/>
+      <text x="215" y="205" text-anchor="middle" font-size="13" font-weight="700" fill="#145a32">.rodata</text>
+      <text x="215" y="224" text-anchor="middle" font-size="11" fill="#1e8449">const tables, strings</text>
+
+      <rect x="90" y="250" width="250" height="70" fill="#fdebd0" stroke="#1f4e79"/>
+      <text x="215" y="280" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7e4a06">.data initial values</text>
+      <text x="215" y="299" text-anchor="middle" font-size="10.5" fill="#935116">copied to RAM at startup</text>
+
+      <rect x="90" y="320" width="250" height="100" fill="#f7fafd" stroke="#1f4e79" stroke-dasharray="5 4"/>
+      <text x="215" y="372" text-anchor="middle" font-size="12" fill="#5d6d7e">free Flash</text>
+
+      <text x="82" y="55" text-anchor="end" font-size="10" fill="#5d6d7e">0x0800_0000</text>
+      <text x="82" y="432" text-anchor="end" font-size="10" fill="#5d6d7e">top of Flash</text>
+
+      <!-- SRAM bar -->
+      <rect x="440" y="60" width="250" height="360" fill="#eef3f8" stroke="#1f4e79" stroke-width="2"/>
+      <rect x="440" y="60" width="250" height="55" fill="#fdebd0" stroke="#1f4e79"/>
+      <text x="565" y="92" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7e4a06">.data</text>
+
+      <rect x="440" y="115" width="250" height="75" fill="#d5f5e3" stroke="#1f4e79"/>
+      <text x="565" y="148" text-anchor="middle" font-size="12.5" font-weight="700" fill="#145a32">.bss</text>
+      <text x="565" y="167" text-anchor="middle" font-size="10.5" fill="#1e8449">zeroed at startup</text>
+
+      <rect x="440" y="190" width="250" height="70" fill="#e8f1f9" stroke="#1f4e79"/>
+      <text x="565" y="220" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0f2b46">HEAP</text>
+      <line x1="565" y1="252" x2="565" y2="200" stroke="#c0392b" stroke-width="2" marker-end="url(#arw)"/>
+      <text x="640" y="240" font-size="10.5" fill="#c0392b">grows upward ↑</text>
+
+      <rect x="440" y="260" width="250" height="60" fill="#f7fafd" stroke="#1f4e79" stroke-dasharray="5 4"/>
+      <text x="565" y="295" text-anchor="middle" font-size="11" fill="#5d6d7e">free RAM</text>
+
+      <rect x="440" y="320" width="250" height="100" fill="#fadbd8" stroke="#1f4e79"/>
+      <text x="565" y="360" text-anchor="middle" font-size="12.5" font-weight="700" fill="#922b21">STACK</text>
+      <line x1="565" y1="330" x2="565" y2="380" stroke="#c0392b" stroke-width="2" marker-end="url(#arw)"/>
+      <text x="565" y="400" text-anchor="middle" font-size="10.5" fill="#922b21">grows downward ↓ (full-descending)</text>
+
+      <text x="700" y="55" font-size="10" fill="#5d6d7e">0x2000_0000</text>
+      <text x="700" y="432" font-size="10" fill="#5d6d7e">top of RAM</text>
+      <text x="565" y="452" text-anchor="middle" font-size="11" font-style="italic" fill="#c0392b">
+        Heap and stack grow toward each other — collision = corruption
+      </text>
+    </svg>
+    <figcaption>Figure 2 — Linker memory map of a typical ARM Cortex-M MCU. Code and constants live in
+    Flash; <code>.data</code>, <code>.bss</code>, heap and stack live in SRAM. Heap grows up, stack grows
+    down. <em>Illustrative diagram (SVG).</em></figcaption>
+  </figure>
+
+  <h3>3.4 PWM generation: register view</h3>
+  <figure>
+    <svg viewBox="0 0 820 300" role="img" aria-label="PWM duty comparison">
+      <rect x="0" y="0" width="820" height="300" fill="#fbfdff"/>
+      <!-- axis -->
+      <line x1="60" y1="20" x2="60" y2="255" stroke="#5d6d7e" stroke-width="1.2"/>
+      <line x1="60" y1="255" x2="790" y2="255" stroke="#5d6d7e" stroke-width="1.2"/>
+      <text x="34" y="70" font-size="11" fill="#0f2b46">3.3 V</text>
+      <text x="34" y="230" font-size="11" fill="#0f2b46">3.3 V</text>
+      <text x="40" y="125" font-size="10" fill="#5d6d7e">0 V</text>
+      <text x="40" y="285" font-size="10" fill="#5d6d7e">0 V</text>
+      <text x="18" y="90" font-size="11" font-weight="700" fill="#1f4e79" transform="rotate(-90 18 90)">A</text>
+      <text x="18" y="230" font-size="11" font-weight="700" fill="#1f4e79" transform="rotate(-90 18 230)">B</text>
+      <!-- Wave A : 25% duty -->
+      <polyline points="80,120 80,70 120,70 120,120 240,120 240,70 280,70 280,120 400,120 400,70 440,70 440,120 560,120 560,70 600,70 600,120 720,120"
+        fill="none" stroke="#1f4e79" stroke-width="2.4"/>
+      <text x="746" y="100" font-size="11.5" fill="#1f4e79" font-weight="700">Duty 25%</text>
+      <!-- Wave B : 60% duty -->
+      <polyline points="80,230 80,180 176,180 176,230 240,230 240,180 336,180 336,230 400,230 400,180 496,180 496,230 560,230 560,180 656,180 656,230 720,230"
+        fill="none" stroke="#e67e22" stroke-width="2.4"/>
+      <text x="746" y="210" font-size="11.5" fill="#c9660f" font-weight="700">Duty 60%</text>
+      <!-- period markers -->
+      <line x1="80" y1="55" x2="80" y2="245" stroke="#95a5a6" stroke-dasharray="4 4"/>
+      <line x1="240" y1="55" x2="240" y2="245" stroke="#95a5a6" stroke-dasharray="4 4"/>
+      <line x1="400" y1="55" x2="400" y2="245" stroke="#95a5a6" stroke-dasharray="4 4"/>
+      <line x1="560" y1="55" x2="560" y2="245" stroke="#95a5a6" stroke-dasharray="4 4"/>
+      <!-- T and Ton annotation for B -->
+      <line x1="80" y1="270" x2="240" y2="270" stroke="#0f2b46" stroke-width="1.4" marker-start="url(#arw)" marker-end="url(#arw)"/>
+      <text x="160" y="290" text-anchor="middle" font-size="11" fill="#0f2b46">T = (ARR+1)·t_tick</text>
+      <line x1="80" y1="160" x2="176" y2="160" stroke="#c0392b" stroke-width="1.4" marker-start="url(#arw)" marker-end="url(#arw)"/>
+      <text x="128" y="152" text-anchor="middle" font-size="11" fill="#c0392b">T_on</text>
+    </svg>
+    <figcaption>Figure 3 — Edge-aligned PWM at two duty cycles with the same period T.
+    Duty = T<sub>on</sub>/T × 100 % = CCR/(ARR+1) × 100 %. <em>Illustrative waveform (SVG).</em></figcaption>
+  </figure>
+</section>
+
+<!-- ================= 4. WORKING PRINCIPLE ================= -->
+<section id="working">
+  <h2>4. Working Principle &amp; Detailed Explanation</h2>
+
+  <h3>4.1 Timer operation, step by step</h3>
+  <ol>
+    <li><strong>Clock selection:</strong> the timer is fed from an internal bus clock (e.g., APB1/APB2) or
+      from an external pin. The clock frequency after the peripheral clock divider is f<sub>clk</sub>.</li>
+    <li><strong>Prescaling:</strong> PSC divides f<sub>clk</sub> by (PSC+1). Choosing PSC = 71 with
+      f<sub>clk</sub> = 72 MHz gives f<sub>tick</sub> = 1 MHz, i.e. t<sub>tick</sub> = 1 µs.</li>
+    <li><strong>Counting:</strong> CNT increments once every t<sub>tick</sub>. In up-counting mode it runs
+      0, 1, 2, … ARR, then wraps to 0.</li>
+    <li><strong>Update event:</strong> on wrap-around the UIF flag is set. With the update interrupt
+      enabled, the CPU vectors to the ISR — this is the periodic time base.</li>
+    <li><strong>Compare event:</strong> when CNT = CCR, the channel flag is set and the output pin can be
+      driven according to the output mode (set / clear / toggle / PWM1 / PWM2).</li>
+    <li><strong>Capture event:</strong> in input-capture mode, an external edge copies CNT into CCR
+      instantly (hardware, no software latency), giving sub-microsecond measurement accuracy.</li>
+  </ol>
+
+  <h3>4.2 Output modes (STM32-style naming)</h3>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Mode</th><th>Behaviour</th><th>Typical use</th></tr>
+    <tr><td>Frozen</td><td>Output not affected by compare</td><td>Disable channel</td></tr>
+    <tr><td>Set on match</td><td>Pin goes high when CNT = CCR and stays high</td><td>One-shot pulse</td></tr>
+    <tr><td>Clear on match</td><td>Pin goes low when CNT = CCR and stays low</td><td>One-shot pulse (inverted)</td></tr>
+    <tr><td>Toggle on match</td><td>Pin toggles each match</td><td>50 % duty generation (half frequency)</td></tr>
+    <tr><td>PWM mode 1</td><td>Active while CNT &lt; CCR (edge-aligned)</td><td>Motor / LED drive</td></tr>
+    <tr><td>PWM mode 2</td><td>Inverted PWM mode 1</td><td>Complementary drive</td></tr>
+  </table>
+  </div>
+
+  <h3>4.3 DC and AC behaviour of the memory subsystem</h3>
+  <p>Although "memory management" is not an AC circuit topic, it has a clear static/dynamic split that
+  students should distinguish:</p>
+  <ul>
+    <li><strong>Static (link-time) behaviour:</strong> section sizes, base addresses, alignment, and the
+      Flash→RAM copy of <code>.data</code>. These are fixed and verified by the <code>.map</code> file.</li>
+    <li><strong>Dynamic (run-time) behaviour:</strong> stack depth varies with call nesting and ISR
+      entry; heap occupancy varies with allocation/free patterns. These must be bounded by design,
+      not merely observed.</li>
+  </ul>
+
+  <h3>4.4 Important assumptions and approximations</h3>
+  <ul>
+    <li>The timer clock is assumed exact. In reality the HSI oscillator may be ±1 % and the crystal
+      ±20–50 ppm; PWM frequency and baud rate inherit that error.</li>
+    <li>Prescaler and ARR are assumed to be buffered (shadow registers) so that a mid-period write does
+      not create a glitch. On many MCUs the ARR preload must be explicitly enabled (ARPE bit).</li>
+    <li>Interrupt latency and ISR execution time are neglected in the ideal timing equations; in practice
+      they add jitter of tens to hundreds of CPU cycles.</li>
+    <li>The stack is assumed to have enough headroom for the worst-case nested ISR — this must be
+      <em>measured</em>, not guessed.</li>
+  </ul>
+
+  <h3>4.5 Advantages, limitations and design considerations</h3>
+  <div class="grid2">
+    <div class="mini">
+      <h4>Timers — advantages</h4>
+      <ul>
+        <li>Fully hardware: no CPU load for counting or PWM generation</li>
+        <li>Deterministic, crystal-accurate timing</li>
+        <li>Multiple simultaneous functions (PWM, capture, time base) on one peripheral</li>
+        <li>Can trigger ADC/DMA autonomously, reducing interrupts</li>
+      </ul>
+      <h4>Timers — limitations</h4>
+      <ul>
+        <li>Limited number of timer peripherals and channels</li>
+        <li>Resolution × range trade-off: you cannot have 1 µs resolution and 1 hour range with one 16-bit timer</li>
+        <li>Counter wrap-around must be handled in capture/period software</li>
+        <li>Shared interrupts and priority inversion can add jitter</li>
+      </ul>
+    </div>
+    <div class="mini">
+      <h4>Dynamic allocation — advantages</h4>
+      <ul>
+        <li>Flexible memory use when object lifetime is unknown</li>
+        <li>Convenient for variable-length buffers and message queues</li>
+      </ul>
+      <h4>Dynamic allocation — limitations</h4>
+      <ul>
+        <li>Non-deterministic execution time (unbounded worst case)</li>
+        <li>Fragmentation → allocation failure after long uptime</li>
+        <li>Memory leaks in firmware with no OS to reclaim memory</li>
+        <li>Not permitted in many safety standards (MISRA C Dir 4.12, DO-178C, IEC 61508)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>4.6 Common student misconceptions</h3>
+  <div class="warn">
+    <ol>
+      <li><strong>"The prescaler only slows things down — it's free."</strong> No: increasing PSC also
+        <em>reduces resolution</em>. With PSC = 9999 you cannot resolve 1 µs events any more.</li>
+      <li><strong>"A 16-bit timer can only time 65535 µs."</strong> False — the prescaler extends the
+        range at the cost of resolution; combined range is (PSC+1)×(ARR+1) ticks.</li>
+      <li><strong>"<code>malloc</code> is fine, I tested it for an hour."</strong> Fragmentation and leaks
+        typically appear after days of uptime with fragmented heap usage patterns.</li>
+      <li><strong>"Stack overflow will show up as a crash."</strong> Often it silently corrupts
+        <code>.bss</code> or heap data, producing bizarre, unrelated bugs.</li>
+      <li><strong>"<code>.bss</code> takes no Flash, therefore it is free."</strong> True for Flash, but it
+        still consumes RAM — usually the scarcest resource.</li>
+      <li><strong>"Global variables are always in <code>.data</code>."</strong> Only initialised ones;
+        uninitialised globals go to <code>.bss</code>.</li>
+      <li><strong>"A local array is safe because it is small."</strong> A 512-byte local array inside an
+        ISR running at 10 kHz will consume far more stack than expected if the ISR is nested.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= 5. WAVEFORMS ================= -->
+<section id="waveforms">
+  <h2>5. Waveforms, Timing Diagrams &amp; Response Plots</h2>
+
+  <h3>5.1 Counter ramp and resulting PWM output</h3>
+  <figure>
+    <svg viewBox="0 0 820 320" role="img" aria-label="Counter sawtooth and PWM output">
+      <rect x="0" y="0" width="820" height="320" fill="#fbfdff"/>
+      <!-- axes -->
+      <line x1="60" y1="30" x2="60" y2="300" stroke="#5d6d7e"/>
+      <text x="46" y="66" font-size="10.5" fill="#0f2b46" text-anchor="end">ARR</text>
+      <text x="46" y="214" font-size="10.5" fill="#0f2b46" text-anchor="end">0</text>
+      <!-- ARR and CCR lines -->
+      <line x1="60" y1="60" x2="790" y2="60" stroke="#1f4e79" stroke-dasharray="6 4"/>
+      <text x="796" y="64" font-size="10.5" fill="#1f4e79">ARR = 999</text>
+      <line x1="60" y1="172" x2="790" y2="172" stroke="#1e8449" stroke-dasharray="6 4"/>
+      <text x="796" y="176" font-size="10.5" fill="#1e8449">CCR = 250</text>
+      <!-- sawtooth -->
+      <polyline points="70,210 250,60 250,210 430,60 430,210 610,60 610,210 790,60"
+        fill="none" stroke="#2e86c1" stroke-width="2.4"/>
+      <text x="120" y="150" font-size="11" fill="#2e86c1" font-weight="700">CNT (sawtooth)</text>
+      <!-- PWM out -->
+      <polyline points="70,290 70,250 115,250 115,290 250,290 250,250 295,250 295,290 430,290 430,250 475,250 475,290 610,290 610,250 655,250 655,290 790,290"
+        fill="none" stroke="#e67e22" stroke-width="2.4"/>
+      <text x="700" y="243" font-size="11" fill="#c9660f" font-weight="700">PWM out</text>
+      <!-- update markers -->
+      <line x1="250" y1="55" x2="250" y2="300" stroke="#95a5a6" stroke-dasharray="3 4"/>
+      <line x1="430" y1="55" x2="430" y2="300" stroke="#95a5a6" stroke-dasharray="3 4"/>
+      <line x1="610" y1="55" x2="610" y2="300" stroke="#95a5a6" stroke-dasharray="3 4"/>
+      <text x="250" y="316" text-anchor="middle" font-size="10" fill="#c0392b">UIF</text>
+      <text x="430" y="316" text-anchor="middle" font-size="10" fill="#c0392b">UIF</text>
+      <text x="610" y="316" text-anchor="middle" font-size="10" fill="#c0392b">UIF</text>
+    </svg>
+    <figcaption>Figure 4 — Up-counting timer: CNT ramps from 0 to ARR, generating a periodic update
+    interrupt (UIF). The PWM output is high while CNT &lt; CCR (PWM mode 1), giving
+    duty = 250/1000 = 25 %. <em>Illustrative waveform (SVG).</em></figcaption>
+  </figure>
+
+  <h3>5.2 Input-capture timing</h3>
+  <figure>
+    <svg viewBox="0 0 820 220" role="img" aria-label="Input capture timing">
+      <rect x="0" y="0" width="820" height="220" fill="#fbfdff"/>
+      <text x="70" y="40" font-size="11" font-weight="700" fill="#0f2b46">Input signal</text>
+      <polyline points="70,90 160,90 160,50 320,50 320,90 470,90 470,50 700,50 700,90 780,90"
+        fill="none" stroke="#1f4e79" stroke-width="2.2"/>
+      <line x1="160" y1="30" x2="160" y2="150" stroke="#c0392b" stroke-dasharray="4 4"/>
+      <line x1="320" y1="30" x2="320" y2="150" stroke="#1e8449" stroke-dasharray="4 4"/>
+      <line x1="470" y1="30" x2="470" y2="150" stroke="#c0392b" stroke-dasharray="4 4"/>
+      <text x="160" y="24" text-anchor="middle" font-size="10.5" fill="#c0392b">↑ CAP1</text>
+      <text x="320" y="24" text-anchor="middle" font-size="10.5" fill="#1e8449">↓ CAP2</text>
+      <text x="470" y="24" text-anchor="middle" font-size="10.5" fill="#c0392b">↑ CAP3</text>
+      <line x1="160" y1="125" x2="320" y2="125" stroke="#c0392b" marker-start="url(#arw)" marker-end="url(#arw)"/>
+      <text x="240" y="145" text-anchor="middle" font-size="11" fill="#c0392b">T_on = (CAP2 − CAP1)·t_tick</text>
+      <line x1="160" y1="175" x2="470" y2="175" stroke="#0f2b46" marker-start="url(#arw)" marker-end="url(#arw)"/>
+      <text x="315" y="197" text-anchor="middle" font-size="11" fill="#0f2b46">T_period = (CAP3 − CAP1)·t_tick</text>
+    </svg>
+    <figcaption>Figure 5 — Input capture: each edge latches the counter into CCR. Consecutive captures
+    give pulse width and period directly in timer ticks, with no software-timing error.
+    <em>Illustrative timing diagram (SVG).</em></figcaption>
+  </figure>
+
+  <h3>5.3 Memory utilisation over runtime</h3>
+  <figure>
+    <svg viewBox="0 0 820 260" role="img" aria-label="Heap fragmentation over time">
+      <rect x="0" y="0" width="820" height="260" fill="#fbfdff"/>
+      <text x="410" y="24" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0f2b46">Heap state: fragmentation growth</text>
+      <!-- t0 -->
+      <text x="60" y="60" font-size="11" fill="#5d6d7e">t = 0</text>
+      <rect x="60" y="70" width="200" height="34" fill="#d5f5e3" stroke="#1e8449"/>
+      <text x="160" y="92" text-anchor="middle" font-size="10.5" fill="#145a32">free 8 KB</text>
+      <!-- t1 -->
+      <text x="60" y="130" font-size="11" fill="#5d6d7e">t = 1</text>
+      <rect x="60" y="140" width="50" height="34" fill="#d6eaf8" stroke="#1f4e79"/>
+      <rect x="110" y="140" width="50" height="34" fill="#d6eaf8" stroke="#1f4e79"/>
+      <rect x="160" y="140" width="100" height="34" fill="#d5f5e3" stroke="#1e8449"/>
+      <text x="210" y="162" text-anchor="middle" font-size="10.5" fill="#145a32">free 4 KB</text>
+      <!-- t2 -->
+      <text x="60" y="200" font-size="11" fill="#5d6d7e">t = 2</text>
+      <rect x="60" y="210" width="50" height="34" fill="#fdebd0" stroke="#e67e22"/>
+      <rect x="110" y="210" width="50" height="34" fill="#d5f5e3" stroke="#1e8449"/>
+      <rect x="160" y="210" width="50" height="34" fill="#fdebd0" stroke="#e67e22"/>
+      <rect x="210" y="210" width="50" height="34" fill="#d5f5e3" stroke="#1e8449"/>
+      <text x="300" y="232" font-size="10.5" fill="#c0392b">4 KB free in four 1 KB holes → a 2 KB request FAILS</text>
+    </svg>
+    <figcaption>Figure 6 — External fragmentation: total free memory is sufficient but no single
+    contiguous block is large enough. This is why fixed-size memory pools are preferred in firmware.
+    <em>Illustrative diagram (SVG).</em></figcaption>
+  </figure>
+
+  <div class="note">
+    <strong>Simulation note:</strong> no Multisim/capture screenshot was supplied with this request, so
+    all figures above are generated as clearly-labelled illustrative SVG diagrams. If you attach an
+    oscilloscope or simulator capture, it can be embedded in this section as a base64
+    <code>&lt;img&gt;</code> and annotated against the theory presented here.
+  </div>
+</section>
+
+<!-- ================= 6. EQUATIONS ================= -->
+<section id="math">
+  <h2>6. Mathematical Equations &amp; Derivations</h2>
+
+  <h3>6.1 Timer tick and period</h3>
+  <div class="eq">
+    f<sub>tick</sub> = f<sub>clk</sub> / (PSC + 1) &nbsp;&nbsp;&nbsp;[Hz]<br>
+    t<sub>tick</sub> = 1 / f<sub>tick</sub> = (PSC + 1) / f<sub>clk</sub> &nbsp;&nbsp;&nbsp;[s]
+  </div>
+  <p><strong>Variables:</strong> f<sub>clk</sub> = timer input clock (Hz), PSC = 16-bit prescaler value
+  (0…65535, dimensionless), f<sub>tick</sub> = counter clock (Hz), t<sub>tick</sub> = time per count (s).</p>
+
+  <h3>6.2 Update (overflow) period and frequency</h3>
+  <div class="eq">
+    T<sub>update</sub> = (ARR + 1) × (PSC + 1) / f<sub>clk</sub> &nbsp;&nbsp;[s]<br><br>
+    f<sub>update</sub> = f<sub>clk</sub> / [ (PSC + 1)(ARR + 1) ] &nbsp;&nbsp;[Hz]
+  </div>
+  <p><strong>Derivation:</strong> the counter takes (ARR+1) ticks to go from 0 to ARR and wrap
+  (including the 0 state). Each tick lasts t<sub>tick</sub> = (PSC+1)/f<sub>clk</sub>.
+  Multiplying gives the update period. The "+1" is because the counter passes through
+  (ARR+1) distinct states in one full cycle.</p>
+  <p><strong>Applicability:</strong> up-counting edge-aligned mode with ARR preload enabled.</p>
+  <p><strong>Limiting cases:</strong> PSC = 0 and ARR = 0 → the counter toggles every tick
+  (f<sub>update</sub> = f<sub>clk</sub>/1). Maximum period for a 16-bit timer:
+  T<sub>max</sub> = 65536 × 65536 / f<sub>clk</sub>.</p>
+
+  <h3>6.3 PWM duty cycle and resolution</h3>
+  <div class="eq">
+    Duty (%) = [ CCR / (ARR + 1) ] × 100 &nbsp;&nbsp; (PWM mode 1, edge-aligned)<br><br>
+    T<sub>on</sub> = CCR × (PSC + 1) / f<sub>clk</sub> &nbsp;&nbsp;[s]<br><br>
+    Duty resolution = 1 / (ARR + 1) &nbsp;&nbsp;(fraction of full scale)
+  </div>
+  <p><strong>Physical meaning:</strong> the average output voltage delivered to a load is
+  V<sub>avg</sub> = D × V<sub>DD</sub>, so a 3.3 V PWM at 60 % duty behaves (for a slow load such as a
+  motor or an LED) like a 1.98 V DC source.</p>
+  <p><strong>Trade-off:</strong> for a fixed f<sub>PWM</sub>, increasing the clock (or decreasing PSC)
+  increases (ARR+1) and therefore improves duty resolution.</p>
+
+  <h3>6.4 Centre-aligned PWM</h3>
+  <div class="eq">
+    T<sub>PWM(centre)</sub> = 2 × ARR × (PSC + 1) / f<sub>clk</sub> &nbsp;&nbsp;[s] &nbsp;&nbsp;(STM32 reference-manual convention)
+  </div>
+  <p>In centre-aligned mode the counter counts up to ARR and back down to 0, so one PWM period
+  contains two ramps and the output is symmetric about the period centre. The benefits are
+  reduced low-order harmonic content (important for motor drives) and inherently aligned
+  complementary edges. The cost is that the achievable frequency is roughly half that of
+  edge-aligned mode for the same ARR.</p>
+
+  <h3>6.5 Input-capture measurement</h3>
+  <div class="eq">
+    ΔN = (CAP2 − CAP1) &nbsp;&nbsp;[counts] &nbsp;&nbsp;(add 65536 if the counter wrapped)<br><br>
+    T<sub>signal</sub> = ΔN × t<sub>tick</sub> = ΔN × (PSC + 1) / f<sub>clk</sub><br><br>
+    f<sub>signal</sub> = 1 / T<sub>signal</sub> = f<sub>clk</sub> / [ ΔN × (PSC + 1) ]
+  </div>
+  <p><strong>Assumption:</strong> ΔN is less than one full counter cycle (no more than one wrap between
+  the two captures). If the counter wraps, the software must add (ARR+1) to the difference.</p>
+  <p><strong>Measurement resolution</strong> is exactly one timer tick, t<sub>tick</sub>, and does not
+  depend on interrupt latency.</p>
+
+  <h3>6.6 SysTick / RTOS tick configuration</h3>
+  <div class="eq">
+    RELOAD = f<sub>clk</sub> × T<sub>tick</sub> − 1<br><br>
+    For a 1 ms tick at 16 MHz: RELOAD = 16 000 000 × 0.001 − 1 = <b>15 999</b>
+  </div>
+  <p>SysTick is a 24-bit down-counter, so RELOAD ≤ 16 777 215. At 16 MHz the maximum single-shot
+  tick period is 16777216/16e6 ≈ 1.048 s.</p>
+
+  <h3>6.7 Watchdog timeout</h3>
+  <div class="eq">
+    T<sub>WDT</sub> = (PSC + 1) × (RLR + 1) / f<sub>LSI</sub>
+  </div>
+  <p>For an independent watchdog clocked by a 32 kHz LSI with PSC = 63 and RLR = 1249:
+  T<sub>WDT</sub> = 64 × 1250 / 32000 = 2.5 s. Firmware must kick the watchdog at less than half this
+  interval to guarantee it never times out during normal execution.</p>
+
+  <h3>6.8 UART baud-rate generation (a classic timer application)</h3>
+  <div class="eq">
+    BRR = f<sub>clk</sub> / (16 × Baud) &nbsp;&nbsp;(oversampling by 16)<br><br>
+    Baud<sub>actual</sub> = f<sub>clk</sub> / (16 × BRR)<br><br>
+    Error (%) = (Baud<sub>actual</sub> − Baud<sub>target</sub>) / Baud<sub>target</sub> × 100
+  </div>
+  <p>Keep the absolute error below ±2 % (ideally below ±1 %) to survive 10-bit framing with the
+  far-end tolerance included.</p>
+
+  <h3>6.9 Memory equations</h3>
+  <div class="eq">
+    RAM<sub>used</sub> = .data + .bss + Heap<sub>peak</sub> + Stack<sub>peak</sub><br><br>
+    RAM<sub>free</sub> = RAM<sub>total</sub> − RAM<sub>used</sub> &nbsp;&nbsp;(must remain &gt; 0 with margin)<br><br>
+    Stack<sub>worst</sub> = Σ (frame<sub>ISR_i</sub>)<sub>nested</sub> + frame<sub>main</sub> + context<sub>save</sub> + margin<br><br>
+    Heap utilisation = Heap<sub>allocated</sub> / Heap<sub>size</sub> × 100 %<br><br>
+    Largest-free-block ratio = Largest free block / Total free bytes
+  </div>
+  <p><strong>Physical meaning:</strong> the third equation is the design rule for stack sizing. A
+  practical margin is 30–50 % (or 512 bytes, whichever is larger) on top of the measured worst case.
+  The last equation quantifies fragmentation: a ratio near 1.0 means healthy, a ratio near 1/N
+  means the heap is shattered into N pieces and the next allocation will likely fail.</p>
+
+  <h3>6.10 Flash and RAM cost of <code>.data</code></h3>
+  <div class="eq">
+    Flash needed = .text + .rodata + |.data|<br>
+    RAM needed = |.data| + |.bss| + heap + stack
+  </div>
+  <p>This is why large constant lookup tables must be declared <code>const</code> (they then live only
+  in Flash/<code>.rodata</code>) rather than as plain globals.</p>
+</section>
+
+<!-- ================= 7. NUMERICALS ================= -->
+<section id="numericals">
+  <h2>7. Solved Numerical Problems</h2>
+
+  <h3>Problem 1 — <span class="badge easy">Easy</span> Periodic interrupt from a general-purpose timer</h3>
+  <p><strong>Given:</strong> A 16-bit timer is clocked at f<sub>clk</sub> = 72 MHz.
+  PSC = 71 and ARR = 999.<br>
+  <strong>Find:</strong> (a) the timer tick period, (b) the update-interrupt period, (c) the interrupt frequency.</p>
+  <p><strong>Step 1 — Tick period:</strong></p>
+  <div class="eq">t<sub>tick</sub> = (PSC + 1) / f<sub>clk</sub> = 72 / 72 × 10<sup>6</sup> = 1 × 10<sup>−6</sup> s = <b>1 µs</b></div>
+  <p><strong>Step 2 — Update period:</strong></p>
+  <div class="eq">T = (ARR + 1) × t<sub>tick</sub> = 1000 × 1 µs = <b>1 ms</b></div>
+  <p><strong>Step 3 — Interrupt frequency:</strong></p>
+  <div class="eq">f = 1 / 1 ms = <b>1 kHz</b></div>
+  <p><strong>Engineering interpretation:</strong> this is the standard 1 ms "system tick" configuration.
+  At 1 kHz the ISR must execute in far less than 1 ms — a practical budget is under 10 % of the period,
+  i.e. under 100 µs, otherwise CPU throughput is lost to interrupt overhead.</p>
+
+  <h3>Problem 2 — <span class="badge moderate">Moderate</span> Designing a 50 Hz servo PWM</h3>
+  <p><strong>Given:</strong> f<sub>clk</sub> = 84 MHz, required PWM frequency = 50 Hz, required duty = 60 %.<br>
+  <strong>Find:</strong> suitable PSC, ARR, CCR values and the resulting duty resolution.</p>
+  <p><strong>Step 1 — Choose the tick:</strong> select PSC = 83 → f<sub>tick</sub> = 84 MHz / 84 = 1 MHz → t<sub>tick</sub> = 1 µs.</p>
+  <p><strong>Step 2 — Period count:</strong> T = 1/50 Hz = 20 ms = 20 000 µs.</p>
+  <div class="eq">ARR + 1 = T / t<sub>tick</sub> = 20 000 → ARR = <b>19 999</b></div>
+  <p><strong>Step 3 — Compare value:</strong></p>
+  <div class="eq">CCR = Duty × (ARR + 1) = 0.60 × 20 000 = <b>12 000</b></div>
+  <p><strong>Step 4 — Resolution:</strong></p>
+  <div class="eq">Duty resolution = 1 / 20 000 = 0.005 % → 20 000 discrete steps</div>
+  <p><strong>Engineering interpretation:</strong> 1 µs resolution corresponds to 0.005 % of the 20 ms
+  period — vastly finer than the ~1 µs pulse-width granularity a hobby servo needs. For hobby servos you
+  would actually set CCR between 1000 (1 ms, −90°) and 2000 (2 ms, +90°), keeping the 20 ms period fixed.
+  Note that ARR = 19 999 fits comfortably in a 16-bit register (max 65 535).</p>
+
+  <h3>Problem 3 — <span class="badge moderate">Moderate</span> Input-capture frequency measurement <em>(GATE-style)</em></h3>
+  <p><strong>Given:</strong> A timer with f<sub>clk</sub> = 8 MHz and PSC = 3 is used in input-capture mode on
+  the rising edges of an unknown signal. Two consecutive captures read CAP1 = 1200 and CAP2 = 5400.
+  The counter did not wrap between the captures.<br>
+  <strong>Find:</strong> the signal period and frequency.</p>
+  <p><strong>Step 1 — Tick period:</strong></p>
+  <div class="eq">t<sub>tick</sub> = (3 + 1) / 8 × 10<sup>6</sup> = 4 / 8 × 10<sup>6</sup> = 0.5 µs</div>
+  <p><strong>Step 2 — Count difference:</strong></p>
+  <div class="eq">ΔN = 5400 − 1200 = 4200 counts</div>
+  <p><strong>Step 3 — Period:</strong></p>
+  <div class="eq">T = 4200 × 0.5 µs = 2100 µs = <b>2.1 ms</b></div>
+  <p><strong>Step 4 — Frequency:</strong></p>
+  <div class="eq">f = 1 / 2.1 ms = <b>476.19 Hz</b></div>
+  <p><strong>Engineering interpretation:</strong> the measurement is limited only by the 0.5 µs tick, so
+  the resolution is 0.5/2100 ≈ 0.024 %. This is why input capture is used for tachometers and
+  ultrasonic sensors instead of polling the pin in software — software polling would add the ISR
+  latency (tens of microseconds) as an error term.</p>
+
+  <h3>Problem 4 — <span class="badge moderate">Moderate</span> SRAM budget check</h3>
+  <p><strong>Given:</strong> an MCU with 20 KB of SRAM and the following linker report:
+  <code>.data</code> = 1.5 KB, <code>.bss</code> = 6.2 KB, heap pool = 4 KB, stack reservation = 2 KB.<br>
+  <strong>Find:</strong> the free RAM remaining, and state whether the design is safe.</p>
+  <p><strong>Step 1 — Total used:</strong></p>
+  <div class="eq">1.5 + 6.2 + 4.0 + 2.0 = 13.7 KB</div>
+  <p><strong>Step 2 — Free RAM:</strong></p>
+  <div class="eq">20 − 13.7 = <b>6.3 KB free (31.5 % headroom)</b></div>
+  <p><strong>Step 3 — Safety assessment:</strong> a 31.5 % margin is acceptable for a first prototype.
+  However, the heap and stack figures are <em>reservations</em>, not measurements. The stack must be
+  verified by the paint/watermark method under worst-case interrupt load, and the heap must be verified
+  by peak-usage instrumentation over a long soak test.</p>
+
+  <h3>Problem 5 — <span class="badge difficult">Difficult</span> Worst-case stack sizing</h3>
+  <p><strong>Given:</strong> A Cortex-M firmware has a main loop whose deepest call chain uses a
+  256-byte frame. Three interrupts can nest: an ADC ISR with 96 bytes of locals, a UART ISR with
+  128 bytes, and a timer ISR with 64 bytes. Each exception entry automatically pushes 8 registers
+  (32 bytes) plus 8 bytes of alignment padding on a floating-point context save.<br>
+  <strong>Find:</strong> the minimum recommended stack size.</p>
+  <p><strong>Step 1 — Worst-case nested ISR frames (assume all three nest):</strong></p>
+  <div class="eq">ISR locals = 96 + 128 + 64 = 288 bytes<br>
+  Exception frames = 3 × (32 + 8) = 120 bytes<br>
+  ISR total = 288 + 120 = 408 bytes</div>
+  <p><strong>Step 2 — Add the main-context frame:</strong></p>
+  <div class="eq">408 + 256 = 664 bytes</div>
+  <p><strong>Step 3 — Add a 30 % safety margin:</strong></p>
+  <div class="eq">664 × 1.30 = 863.2 bytes → round up to <b>1024 bytes (1 KB)</b></div>
+  <p><strong>Engineering interpretation:</strong> the naive estimate of "a few hundred bytes" would
+  overflow on the first occasion that all three interrupts nest. Rounding up to a power of two also
+  makes the stack easier to align and to monitor with a watermark pattern such as
+  <code>0xDEADBEEF</code>. Verify at runtime with <code>uxTaskGetStackHighWaterMark()</code> (FreeRTOS)
+  or by painting the stack and measuring the untouched region.</p>
+
+  <h3>Problem 6 — <span class="badge difficult">Difficult</span> UART baud error with a timer clock</h3>
+  <p><strong>Given:</strong> f<sub>clk</sub> = 16 MHz, target baud = 9600, oversampling = 16.<br>
+  <strong>Find:</strong> BRR, actual baud, and percentage error.</p>
+  <p><strong>Step 1:</strong> BRR = 16 × 10<sup>6</sup> / (16 × 9600) = 104.1667 → integer BRR = 104.</p>
+  <p><strong>Step 2:</strong> Baud<sub>actual</sub> = 16 × 10<sup>6</sup> / (16 × 104) = 9615.38 baud.</p>
+  <p><strong>Step 3:</strong> Error = (9615.38 − 9600)/9600 × 100 = <b>+0.16 %</b>.</p>
+  <p><strong>Engineering interpretation:</strong> 0.16 % is well within the ±2 % budget, so
+  communication will be reliable. Accumulated error over a 10-bit frame is about 1.6 % of one bit
+  period — safely below the 50 % sampling-point margin. Using a fractional baud-rate register
+  (BRR with a 4-bit fraction field) reduces this error further.</p>
+</section>
+
+<!-- ================= 8. GATE ================= -->
+<section id="gate">
+  <h2>8. GATE Examination Preparation</h2>
+  <p>The following are <strong>original GATE-style questions</strong> written for this module. They are
+  <em>not</em> claimed to be actual previous-year GATE questions. Attempt them, then press
+  <em>Check GATE Answers</em> for the score and full explanations.</p>
+
+  <div id="gateQuiz"></div>
+
+  <div class="no-print" style="margin-top:16px;">
+    <button class="btn" onclick="checkQuiz(GATE_Q,'gq','gateScore')">Check GATE Answers</button>
+    <button class="btn ghost" onclick="resetQuiz('gq','gateScore')">Reset</button>
+  </div>
+  <div class="scorebox" id="gateScore"></div>
+
+  <h3>High-priority GATE concepts for this topic</h3>
+  <div class="grid2">
+    <div class="mini">
+      <h4>Timers</h4>
+      <ul>
+        <li>(PSC+1)(ARR+1)/f<sub>clk</sub> is the single most-tested formula</li>
+        <li>Resolution vs range trade-off</li>
+        <li>Duty cycle = CCR/(ARR+1)</li>
+        <li>Input-capture count arithmetic, including wrap handling</li>
+        <li>Centre-aligned period = 2× edge-aligned period</li>
+        <li>Counter width overflow (16-bit vs 24-bit SysTick)</li>
+      </ul>
+    </div>
+    <div class="mini">
+      <h4>Memory</h4>
+      <ul>
+        <li>Which section holds what (<code>.text</code>, <code>.rodata</code>, <code>.data</code>, <code>.bss</code>)</li>
+        <li>Flash vs RAM accounting for initialised globals</li>
+        <li>Stack direction and frame composition on Cortex-M</li>
+        <li>Fragmentation vs leakage distinction</li>
+        <li><code>volatile</code> semantics with ISR-shared variables</li>
+        <li>Linker-script-controlled placement of buffers</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 9. INTERVIEW ================= -->
+<section id="interview">
+  <h2>9. Core Electronics Company Interview Preparation</h2>
+  <p>Click any question to expand a model answer written at the depth expected in
+  semiconductor, embedded-product and hardware-validation interviews.</p>
+
+  <details class="qa"><summary>Q1. What is the fundamental difference between a hardware timer and a software delay loop?</summary>
+  <div class="ans">A software delay loop burns CPU cycles doing nothing, is not accurate (it depends on
+  compiler optimisation, cache behaviour, interrupt load and clock frequency), and blocks all other
+  work. A hardware timer is an independent silicon counter that runs in parallel with the CPU; the CPU
+  is free to sleep or perform other tasks, and the timing accuracy depends only on the clock source
+  (typically a crystal, tens of ppm). Practical consequence: a <code>for(i=0;i&lt;100000;i++);</code>
+  delay can vary by an order of magnitude between a debug and a release build, whereas a timer-based
+  delay does not change at all.</div></details>
+
+  <details class="qa"><summary>Q2. How does a prescaler affect both the range and the resolution of a timer?</summary>
+  <div class="ans">The prescaler divides the input clock by (PSC+1), so the tick period becomes
+  (PSC+1)/f<sub>clk</sub>. Increasing PSC lengthens the maximum measurable/generatable time
+  (range = (PSC+1)(ARR+1) ticks) but simultaneously makes each tick coarser, so the smallest
+  resolvable time interval grows proportionally. The product of range and resolution is constant for a
+  given counter width and clock: you cannot improve both at once. If you need both fine resolution and
+  a long range, use a 32-bit timer, cascade two timers, or count overflows in software.</div></details>
+
+  <details class="qa"><summary>Q3. Explain input capture versus output compare with a practical example of each.</summary>
+  <div class="ans"><strong>Output compare</strong> compares CNT against CCR and acts on the output pin
+  (set/clear/toggle/PWM). It <em>generates</em> timing. Example: generating a 20 kHz PWM for a
+  BLDC motor gate driver.<br>
+  <strong>Input capture</strong> copies CNT into CCR when an external edge is detected. It
+  <em>measures</em> timing. Example: measuring the echo pulse width from an HC-SR04 ultrasonic sensor,
+  or measuring the period of a tachometer signal to compute RPM. Both use the same CCR registers but
+  the data direction and the trigger source are opposite.</div></details>
+
+  <details class="qa"><summary>Q4. What is the difference between an independent watchdog and a window watchdog?</summary>
+  <div class="ans">An <strong>independent watchdog (IWDG)</strong> is clocked by a dedicated low-speed
+  oscillator (LSI, ~32 kHz) and therefore keeps running even if the main clock or PLL fails. It resets
+  the MCU if it is not refreshed within the timeout — it only detects "too late". A
+  <strong>window watchdog (WWDG)</strong> is clocked from the main clock and resets the MCU if the
+  refresh occurs <em>either too late or too early</em>, i.e. outside a defined window. The window
+  feature catches runaway code that refreshes the watchdog far too often (for example, a loop that
+  crashes into the refresh routine). Safety-critical designs often use both.</div></details>
+
+  <details class="qa"><summary>Q5. Your PWM output has the correct frequency but the duty cycle is wrong. How do you debug it?</summary>
+  <div class="ans">A systematic checklist:<br>
+  1. Verify CCR is written to the <em>active</em> channel (CCR1 vs CCR2) and that the correct channel is
+  enabled in the capture/compare enable register.<br>
+  2. Check the output mode: PWM mode 1 is active-high while PWM mode 2 is inverted — a 40 % setting can
+  appear as 60 %.<br>
+  3. Confirm the compare preload bit — without it, a CCR write can take effect immediately and produce a
+  distorted first cycle.<br>
+  4. Confirm the polarity bit (CCxP) and the GPIO alternate-function configuration; a wrong AF number
+  leaves the pin as a plain GPIO.<br>
+  5. Check whether ARR was changed after CCR was computed; duty = CCR/(ARR+1) depends on both.<br>
+  6. Measure with a scope on the pin itself, not through a long jumper, to rule out loading and ringing.</div></details>
+
+  <details class="qa"><summary>Q6. Why is <code>malloc</code> discouraged in embedded firmware?</summary>
+  <div class="ans">Four reasons: (i) <em>non-determinism</em> — the worst-case execution time of
+  <code>malloc</code> is unbounded, which breaks real-time deadlines; (ii) <em>fragmentation</em> — after
+  a long uptime the heap may have plenty of total free bytes but no contiguous block large enough;
+  (iii) <em>leaks</em> — embedded firmware typically has no OS to reclaim memory, so a single missed
+  <code>free</code> permanently loses RAM; (iv) <em>certification</em> — MISRA C and safety standards
+  such as DO-178C and IEC 61508 restrict or forbid dynamic allocation. The preferred alternatives are
+  static allocation, fixed-size memory pools, ring buffers, and RTOS heap schemes that never free
+  (e.g. FreeRTOS heap_1).</div></details>
+
+  <details class="qa"><summary>Q7. What is heap fragmentation and how do you prevent it?</summary>
+  <div class="ans">Fragmentation is the condition where free memory exists but is split into blocks
+  smaller than the requested allocation, so an allocation fails despite sufficient total free space.
+  It is aggravated by mixing allocation sizes and by long-lived allocations interleaved with short-lived
+  ones. Prevention: (1) use fixed-size memory pools so every block is identical and any free block
+  satisfies any request; (2) allocate all long-lived objects at start-up ("allocate once, never free");
+  (3) use a coalescing allocator (FreeRTOS heap_4/5, TLSF) that merges adjacent free blocks;
+  (4) periodically monitor the largest-free-block ratio rather than total free bytes.</div></details>
+
+  <details class="qa"><summary>Q8. How do you detect and prevent stack overflow on an MCU with no MMU?</summary>
+  <div class="ans"><strong>Detection:</strong> (a) stack painting — fill the stack with a known pattern
+  (e.g. <code>0xDEADBEEF</code>) at start-up and measure how much remains untouched
+  (<code>uxTaskGetStackHighWaterMark()</code> does this in FreeRTOS); (b) a stack canary — place a magic
+  value at the stack limit and check it periodically; (c) a hardware watchpoint or the MPU, configured
+  to make the region below the stack fault on access; (d) the Cortex-M stack-limit check registers
+  (PSPLIM/MSPLIM) on newer cores.<br>
+  <strong>Prevention:</strong> size the stack from the measured worst case plus 30–50 % margin, avoid
+  large local arrays and <code>printf</code> in ISRs, avoid deep recursion, and keep ISR nesting bounded
+  by priority design.</div></details>
+
+  <details class="qa"><summary>Q9. Explain the role of the linker script and how you would place a DMA buffer in a specific memory region.</summary>
+  <div class="ans">The linker script (GNU LD) or scatter file (ARM Compiler) defines the memory regions
+  (FLASH, RAM, CCMRAM, etc.), their base addresses and sizes, and maps input sections from object files
+  into those regions. It also defines symbols such as <code>_sdata</code>, <code>_edata</code>,
+  <code>_sbss</code>, <code>_ebss</code>, <code>_estack</code> used by the startup code.<br>
+  To place a buffer in a specific region: define a named section in the linker script
+  (e.g. <code>.dma_buffer : { *(.dma_buffer) } &gt; RAM_D1</code>), then in C use
+  <code>__attribute__((section(".dma_buffer"))) uint8_t buf[1024];</code>. On STM32F4 this is how you
+  keep a buffer out of CCM RAM, which the DMA controller cannot access.</div></details>
+
+  <details class="qa"><summary>Q10. Why must a variable shared between an ISR and main code be declared <code>volatile</code>?</summary>
+  <div class="ans">Without <code>volatile</code>, the compiler is entitled to assume that a variable
+  cannot change except through visible code. It may therefore cache the value in a register and never
+  re-read it, producing an infinite loop such as
+  <code>while(!flag);</code> where <code>flag</code> is set by the ISR. <code>volatile</code> forces a
+  memory access on every read/write. Note that <code>volatile</code> does <em>not</em> provide atomicity
+  or mutual exclusion — for multi-byte shared data you still need critical sections, atomics, or a
+  lock-free single-writer/single-reader design.</div></details>
+
+  <details class="qa"><summary>Q11. What causes timer interrupt jitter and how can it be reduced?</summary>
+  <div class="ans">Jitter is the variation in the time between the hardware event and the start of the
+  ISR code. Sources: (i) interrupt latency of the core (12 cycles on Cortex-M for tail-chaining, more
+  with flash wait states); (ii) higher-priority interrupts delaying the timer ISR; (iii) long critical
+  sections with interrupts disabled; (iv) DMA bus contention; (v) the ISR itself taking longer than the
+  period, causing overrun. Mitigation: keep the timer ISR minimal (set a flag or push to a queue, do
+  the work in the main loop), use hardware capture or DMA instead of interrupt-driven sampling, give
+  the timer an appropriate pre-emption priority, and avoid disabling interrupts for long periods.</div></details>
+
+  <details class="qa"><summary>Q12. Your board resets randomly every few hours. How do you diagnose it?</summary>
+  <div class="ans">Start by reading the reset-cause flags in the RCC/PMU registers (power-on reset,
+  brown-out, watchdog, software reset, pin reset). If it is a watchdog reset, the firmware is locking
+  up; if it is a brown-out, suspect the power supply, inrush current from a radio transmitter, or an
+  inadequate decoupling capacitor. Then: enable the hard-fault handler and log the stacked PC, LR and
+  xPSR to non-volatile memory so you can identify the faulting instruction; check the stack high-water
+  mark; run the system with the watchdog enabled and log the task/state at the moment of the kick. In
+  the majority of field reports this pattern is a stack overflow or a heap exhaustion triggered by an
+  edge-case input.</div></details>
+
+  <details class="qa"><summary>Q13. In a FreeRTOS design, why does each task need its own stack, and how do you size it?</summary>
+  <div class="ans">Each task has an independent context (registers, return addresses, locals) and the
+  scheduler may switch tasks at any time, so each task must own a separate stack region. The size must
+  cover the deepest call chain of that task plus its local variables, plus the context saved by the
+  scheduler (and by the FPU if floating point is used). Practical method: start with a generous
+  estimate, run the system under worst-case load, then read
+  <code>uxTaskGetStackHighWaterMark()</code> and set the stack to about 1.3–1.5× the peak observed
+  usage. Interrupts run on the main stack (MSP), not on task stacks, so the MSP size must also be
+  validated separately.</div></details>
+
+  <details class="qa"><summary>Q14. A DMA transfer into an SRAM buffer occasionally produces corrupted data on a Cortex-M7. What is the likely cause?</summary>
+  <div class="ans">Cache coherency. If the buffer lies in a cacheable region, the CPU may read a stale
+  cached copy while DMA has written new data straight into SRAM (bypassing the cache), or the CPU may
+  hold dirty cache lines that overwrite the DMA result. Fixes: (1) place DMA buffers in a
+  non-cacheable region (MPU-configured or a dedicated SRAM bank) as the cleanest solution;
+  (2) otherwise, clean (flush) the cache before starting a transmit DMA and invalidate it after a
+  receive DMA completes; (3) ensure the buffer is aligned to a cache line (32 bytes on Cortex-M7) and
+  that its size is a multiple of the cache line, to avoid invalidating neighbouring variables.</div></details>
+
+  <h3>Industry perspective</h3>
+  <div class="ok">
+    <p>In real product development these two topics appear together constantly. A motor-control
+    firmware engineer spends most of the day on timer configuration — centre-aligned PWM with dead-time
+    insertion for a three-phase inverter, ADC triggering synchronised to the PWM carrier, and input
+    capture for rotor position. A firmware engineer working on a battery-management or automotive ECU
+    spends most of the day on memory: static allocation with pools, MPU-protected stacks, linker-script
+    placement of safety-critical data in a redundant RAM bank, and runtime stack monitoring reported to
+    a diagnostic trouble code. Validation engineers write tests that specifically stress these paths —
+    maximum ISR nesting, minimum free heap, worst-case interrupt storm — because that is where field
+    failures come from.</p>
+  </div>
+</section>
+
+<!-- ================= 10. APPLICATIONS ================= -->
+<section id="applications">
+  <h2>10. Applications &amp; Industry Relevance</h2>
+
+  <h3>10.1 Where timers are used in commercial systems</h3>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Application</th><th>Timer function</th><th>Typical specification</th></tr>
+    <tr><td>BLDC / PMSM motor control</td><td>Centre-aligned PWM + dead-time + ADC trigger</td><td>10–20 kHz carrier, 3 complementary channels</td></tr>
+    <tr><td>Hobby / industrial servo</td><td>Edge-aligned PWM, 50 Hz frame</td><td>1–2 ms pulse in a 20 ms period</td></tr>
+    <tr><td>LED dimming &amp; backlights</td><td>PWM with 12–16-bit resolution</td><td>1–10 kHz, flicker-free above ~1 kHz</td></tr>
+    <tr><td>RTOS tick</td><td>SysTick periodic interrupt</td><td>1 ms (1000 Hz) or 100 µs for hard real-time</td></tr>
+    <tr><td>Ultrasonic ranging (HC-SR04)</td><td>Input capture on the echo pulse</td><td>Resolution 1 µs → ~0.17 mm per count</td></tr>
+    <tr><td>Rotary encoder / tachometer</td><td>Quadrature encoder mode + input capture</td><td>Up to several MHz edge rates</td></tr>
+    <tr><td>UART / SPI / CAN timing</td><td>Baud-rate generator, protocol timeouts</td><td>&lt;2 % baud error</td></tr>
+    <tr><td>Class-D audio amplifier</td><td>High-frequency PWM + dead-time</td><td>200–400 kHz carrier</td></tr>
+    <tr><td>Watchdog supervision</td><td>IWDG / WWDG</td><td>Recovery within tens to hundreds of ms</td></tr>
+  </table>
+  </div>
+
+  <h3>10.2 Where memory management is critical</h3>
+  <ul>
+    <li><strong>Automotive ECUs:</strong> MISRA C compliance, MPU-protected task stacks, static-only
+      allocation, ECC-protected RAM, and redundant copies of safety-critical variables.</li>
+    <li><strong>Medical devices:</strong> deterministic memory footprints documented for certification,
+      stack analysis for every ISR, and no dynamic allocation after initialisation.</li>
+    <li><strong>IoT sensors:</strong> fixed ring buffers for radio packets, DMA buffers placed in
+      non-cacheable RAM, and aggressive low-power use of the heap during deep sleep (RAM retention
+      domains).</li>
+    <li><strong>Networking stacks (lwIP, BLE):</strong> packet buffer pools (<code>pbuf</code> pools) with
+      reference counting instead of <code>malloc</code>, exactly to avoid fragmentation under sustained
+      traffic.</li>
+    <li><strong>Bootloaders:</strong> carefully link-time-placed vector tables, flash-write buffers, and
+      a linker script that reserves a region for the application image.</li>
+  </ul>
+
+  <h3>10.3 Design considerations and common implementation challenges</h3>
+  <div class="grid2">
+    <div class="mini">
+      <h4>Timer design challenges</h4>
+      <ul>
+        <li>Timer peripheral sharing between incompatible functions</li>
+        <li>Glitches when updating ARR/CCR without preload</li>
+        <li>Counter wrap handling in long-interval software timers</li>
+        <li>Clock-source accuracy and temperature drift (RC vs crystal)</li>
+        <li>Reduced timer clock frequency in low-power modes</li>
+      </ul>
+    </div>
+    <div class="mini">
+      <h4>Memory design challenges</h4>
+      <ul>
+        <li>Stack sizing under worst-case ISR nesting</li>
+        <li>Heap/stack collision with no MMU protection</li>
+        <li>Cache coherency with DMA on Cortex-M7</li>
+        <li>Alignment and endianness for structures shared with hardware</li>
+        <li>Flash wear-out when using emulated EEPROM</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>10.4 Career relevance</h3>
+  <p>Fluency in timers and memory management is a screening criterion for roles such as
+  <span class="pill">Embedded Firmware Engineer</span>
+  <span class="pill">Motor Control Engineer</span>
+  <span class="pill">BSP / Driver Developer</span>
+  <span class="pill">Automotive Software Engineer</span>
+  <span class="pill">Hardware Validation Engineer</span>
+  <span class="pill">Firmware Architect</span>
+  <span class="pill">Silicon Applications Engineer</span>.
+  Interviewers almost always probe these areas because they reveal whether a candidate has shipped
+  real firmware rather than only written academic code.</p>
+</section>
+
+<!-- ================= 11. QUIZ ================= -->
+<section id="quiz">
+  <h2>11. Interactive Topic Quiz (10 Questions)</h2>
+  <p>Select one option per question, then press <strong>Check Answers</strong>. Your score out of 10 and
+  the percentage are calculated automatically, and a full explanation appears under every question.</p>
+
+  <div id="topicQuiz"></div>
+
+  <div class="no-print" style="margin-top:16px;">
+    <button class="btn" onclick="checkQuiz(TOPIC_Q,'tq','topicScore')">Check Answers</button>
+    <button class="btn ghost" onclick="resetQuiz('tq','topicScore')">Reset Quiz</button>
+  </div>
+  <div class="scorebox" id="topicScore"></div>
+</section>
+
+<!-- ================= 12. REVISION ================= -->
+<section id="revision">
+  <h2>12. Additional Revision Materials</h2>
+
+  <h3>12.1 Formula sheet</h3>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Quantity</th><th>Formula</th><th>Units / notes</th></tr>
+    <tr><td>Timer tick frequency</td><td>f<sub>tick</sub> = f<sub>clk</sub>/(PSC+1)</td><td>Hz</td></tr>
+    <tr><td>Timer tick period</td><td>t<sub>tick</sub> = (PSC+1)/f<sub>clk</sub></td><td>s; the timer resolution</td></tr>
+    <tr><td>Update / overflow period</td><td>T = (ARR+1)(PSC+1)/f<sub>clk</sub></td><td>s; edge-aligned up-counting</td></tr>
+    <tr><td>Update frequency</td><td>f = f<sub>clk</sub>/[(PSC+1)(ARR+1)]</td><td>Hz</td></tr>
+    <tr><td>PWM duty cycle</td><td>D = CCR/(ARR+1)</td><td>fraction; ×100 for %</td></tr>
+    <tr><td>PWM on-time</td><td>T<sub>on</sub> = CCR(PSC+1)/f<sub>clk</sub></td><td>s</td></tr>
+    <tr><td>Duty resolution</td><td>1/(ARR+1)</td><td>fraction of full scale</td></tr>
+    <tr><td>Centre-aligned period</td><td>T = 2·ARR·(PSC+1)/f<sub>clk</sub></td><td>s; ~half the edge-aligned frequency</td></tr>
+    <tr><td>Input-capture interval</td><td>ΔT = (CAP2−CAP1)·t<sub>tick</sub></td><td>s; add (ARR+1) if wrapped</td></tr>
+    <tr><td>SysTick reload</td><td>RELOAD = f<sub>clk</sub>·T − 1</td><td>24-bit max 16 777 215</td></tr>
+    <tr><td>Watchdog timeout</td><td>T<sub>WDT</sub> = (PSC+1)(RLR+1)/f<sub>LSI</sub></td><td>s</td></tr>
+    <tr><td>UART baud divisor</td><td>BRR = f<sub>clk</sub>/(16·Baud)</td><td>oversampling 16</td></tr>
+    <tr><td>Baud error</td><td>ε = (Baud<sub>act</sub>−Baud<sub>tgt</sub>)/Baud<sub>tgt</sub></td><td>keep |ε| &lt; 2 %</td></tr>
+    <tr><td>RAM used</td><td>.data + .bss + Heap<sub>peak</sub> + Stack<sub>peak</sub></td><td>bytes</td></tr>
+    <tr><td>Flash used</td><td>.text + .rodata + |.data|</td><td>bytes</td></tr>
+  </table>
+  </div>
+
+  <h3>12.2 Important definitions at a glance</h3>
+  <ul>
+    <li><strong>Prescaler:</strong> a divider inserted between the clock source and the counter.</li>
+    <li><strong>Auto-reload:</strong> the value at which the counter wraps and the update event fires.</li>
+    <li><strong>Capture/compare register:</strong> dual-purpose register for PWM duty or latched count.</li>
+    <li><strong>Stack:</strong> LIFO storage for function frames and interrupt context; grows downward on ARM Cortex-M (full-descending).</li>
+    <li><strong>Heap:</strong> dynamic-allocation region; grows upward, toward the stack.</li>
+    <li><strong>Fragmentation:</strong> free memory that exists but cannot satisfy the request.</li>
+    <li><strong>Deterministic allocation:</strong> allocation whose worst-case time is bounded and independent of history.</li>
+  </ul>
+
+  <h3>12.3 Comparison tables</h3>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Feature</th><th>Static allocation</th><th>Dynamic allocation (heap)</th></tr>
+    <tr><td>Determined at</td><td>Compile/link time</td><td>Run time</td></tr>
+    <tr><td>Worst-case timing</td><td>Zero cost (no allocation call)</td><td>Unbounded</td></tr>
+    <tr><td>Fragmentation</td><td>None</td><td>Possible</td></tr>
+    <tr><td>Memory efficiency</td><td>Lower (reserved even when unused)</td><td>Higher on average</td></tr>
+    <tr><td>Safety certification</td><td>Preferred / required</td><td>Restricted or forbidden</td></tr>
+    <tr><td>Typical use</td><td>RTOS tasks, pools, DMA buffers</td><td>Non-critical, variable-size data</td></tr>
+  </table>
+  </div>
+
+  <div class="tablewrap">
+  <table>
+    <tr><th>Feature</th><th>Hardware timer</th><th>RTOS software timer</th></tr>
+    <tr><td>Implementation</td><td>Silicon counter</td><td>A service task and a list of expiry times</td></tr>
+    <tr><td>Accuracy</td><td>Clock-accurate</td><td>Depends on tick period and task priority</td></tr>
+    <tr><td>CPU load</td><td>None for counting</td><td>Requires a running scheduler task</td></tr>
+    <tr><td>Number available</td><td>Limited by peripheral count</td><td>Unlimited (RAM-bound)</td></tr>
+    <tr><td>Callback context</td><td>ISR</td><td>Timer-service task (safe to call RTOS APIs)</td></tr>
+  </table>
+  </div>
+
+  <div class="tablewrap">
+  <table>
+    <tr><th>Feature</th><th>Stack</th><th>Heap</th></tr>
+    <tr><td>Allocation</td><td>Automatic on function entry</td><td>Explicit via <code>malloc</code></td></tr>
+    <tr><td>Deallocation</td><td>Automatic on function return</td><td>Explicit via <code>free</code></td></tr>
+    <tr><td>Growth direction</td><td>Downward (Cortex-M)</td><td>Upward</td></tr>
+    <tr><td>Typical failure</td><td>Overflow into heap</td><td>Exhaustion / fragmentation</td></tr>
+    <tr><td>Monitoring method</td><td>Watermark / high-water mark</td><td>Largest-free-block tracking</td></tr>
+  </table>
+  </div>
+
+  <h3>12.4 Common errors and troubleshooting</h3>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+    <tr><td>PWM frequency is half of expected</td><td>Centre-aligned mode instead of edge-aligned</td><td>Set CMS bits to edge-aligned or recompute ARR</td></tr>
+    <tr><td>Timer interrupt fires twice per period</td><td>Update flag not cleared, or both update and compare interrupts enabled</td><td>Clear the correct status flag in the ISR</td></tr>
+    <tr><td>Captured period is wildly wrong</td><td>Counter wrap between captures not accounted for</td><td>Add (ARR+1) when CAP2 &lt; CAP1</td></tr>
+    <tr><td>Random resets after hours</td><td>Stack overflow or heap exhaustion</td><td>Measure high-water mark; switch to pools</td></tr>
+    <tr><td>Variables not updating in a loop</td><td>Missing <code>volatile</code></td><td>Declare ISR-shared variables <code>volatile</code></td></tr>
+    <tr><td>Code works in debug but not in release</td><td>Optimiser removed a busy-wait or reordered accesses</td><td>Use <code>volatile</code> and hardware timers, not delay loops</td></tr>
+    <tr><td>DMA data corrupt on M7</td><td>Cache coherency</td><td>Place buffers in non-cacheable RAM or clean/invalidate</td></tr>
+  </table>
+  </div>
+
+  <h3>12.5 Memory aids</h3>
+  <div class="note">
+    <ul>
+      <li><strong>"T = R × P / f"</strong> — <em>T</em>ime = <em>R</em>eload count × <em>P</em>rescaler / <em>f</em>requency.</li>
+      <li><strong>"+1 always"</strong> — both PSC and ARR contribute a +1 because the counter passes
+        through (ARR+1) states and the divider has (PSC+1) values.</li>
+      <li><strong>"data is doubled, bss is free of flash"</strong> — <code>.data</code> costs Flash + RAM;
+        <code>.bss</code> costs RAM only.</li>
+      <li><strong>"heap up, stack down"</strong> — they grow toward each other; the gap is your safety margin.</li>
+      <li><strong>"Pools, not malloc"</strong> — fixed-size blocks never fragment.</li>
+      <li><strong>"Capture measures, compare generates"</strong> — a quick mnemonic for CCR usage.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 13. DELIVERABLES ================= -->
+<section id="deliverables">
+  <h2>13. Deliverables, Instructions &amp; Limitations</h2>
+
+  <h3>13.1 Download this page</h3>
+  <p>Click the button below to save this entire learning module as a standalone HTML file. The page
+  uses only embedded CSS and JavaScript, so the saved file works completely offline.</p>
+  <div class="no-print">
+    <button class="btn alt" onclick="downloadPage()">⬇ Download this page as HTML</button>
+    <button class="btn ghost" onclick="window.print()">🖨 Print / Save as PDF</button>
+  </div>
+
+  <h3>13.2 How to open the file</h3>
+  <ol>
+    <li>Click the download button above (or save the provided file).</li>
+    <li>Locate the file <code>Timers_and_Memory_Management_Embedded_Systems.html</code> in your Downloads folder.</li>
+    <li>Double-click it, or right-click → <em>Open with</em> → <strong>Google Chrome</strong> / <strong>Microsoft Edge</strong>.</li>
+    <li>No internet connection, server, or additional library is required.</li>
+    <li>To produce a PDF, press <kbd>Ctrl</kbd>+<kbd>P</kbd> and choose <em>Save as PDF</em>.</li>
+  </ol>
+
+  <h3>13.3 Sections included</h3>
+  <div class="grid3">
+    <div class="mini"><ol style="padding-left:18px;">
+      <li>Introduction &amp; objectives</li>
+      <li>Fundamentals &amp; terminology</li>
+      <li>Block diagrams &amp; memory map</li>
+      <li>Working principle</li>
+      <li>Waveforms &amp; timing diagrams</li>
+      <li>Equations &amp; derivations</li>
+    </ol></div>
+    <div class="mini"><ol start="7" style="padding-left:18px;">
+      <li>Six solved numericals</li>
+      <li>12 GATE-style MCQs + interactive quiz</li>
+      <li>14 interview Q&amp;A</li>
+      <li>Applications &amp; industry relevance</li>
+      <li>10-question interactive topic quiz</li>
+      <li>Revision, formula sheet &amp; tables</li>
+    </ol></div>
+    <div class="mini"><strong>Interactive features</strong>
+      <ul>
+        <li>Sticky navigation menu</li>
+        <li>Two auto-scoring quizzes with reset</li>
+        <li>Expandable interview answers</li>
+        <li>Live timer/PWM calculator</li>
+        <li>Print-friendly CSS</li>
+        <li>Download-as-HTML button</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>13.4 Simulation screenshot status</h3>
+  <div class="warn">
+    <strong>No simulation screenshot was attached to this request.</strong> Consequently, all figures in
+    this module are original, clearly-labelled illustrative SVG diagrams generated within the HTML.
+    No simulated measurement values, oscilloscope traces, or component values have been fabricated.
+    If you supply a Multisim, oscilloscope or logic-analyser capture, it can be embedded directly as a
+    base64 <code>&lt;img&gt;</code> in Section 5 along with the measured values and a comparison against
+    the theoretical predictions.
+  </div>
+
+  <h3>13.5 Limitations and assumptions</h3>
+  <ul>
+    <li>Register names follow the widely used STM32 / ARM Cortex-M convention. Other vendors
+      (TI MSP430, Microchip PIC, NXP LPC) use different names for equivalent functions; the underlying
+      principles and equations are unchanged.</li>
+    <li>The centre-aligned PWM formula uses the STM32 reference-manual convention (2·ARR). Some textbooks
+      write 2·(ARR+1); the difference is one count and does not change the engineering conclusion.</li>
+    <li>Timer equations assume an ideal, jitter-free clock. Real designs must budget for oscillator
+      tolerance, PLL jitter and interrupt latency.</li>
+    <li>Memory-map addresses (0x0800_0000, 0x2000_0000) are illustrative of a typical Cortex-M device
+      and are not tied to a specific part number.</li>
+    <li>Stack and heap sizing recommendations follow common industry practice (30–50 % margin) but must
+      be validated by measurement on the actual target hardware.</li>
+    <li>All quiz and GATE-style questions are original compositions for this module and are not
+      presented as previous-year GATE questions.</li>
+  </ul>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p><strong>Timers &amp; Memory Management in Embedded Systems</strong> — Interactive Learning Module</p>
+    <p>Subject: Embedded Systems • Unit: On-Chip Peripherals &amp; System Resources • Level: B.E./B.Tech ECE</p>
+    <p>Designed for college students, GATE aspirants and core-electronics interview candidates.</p>
+    <p style="opacity:.7;font-size:.8rem;">All diagrams are original SVG illustrations. Works fully offline in Chrome, Edge and Firefox.</p>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   QUESTION BANKS
+   ============================================================ */
+const GATE_Q = [
+ {diff:"Easy",
+  q:"A 16-bit up-counting timer is clocked at 8 MHz with prescaler PSC = 7 and auto-reload ARR = 999. The update-interrupt period is:",
+  opts:["125 µs","1 ms","8 ms","64 ms"], ans:1,
+  exp:"t_tick = (PSC+1)/f_clk = 8/8 MHz = 1 µs. T = (ARR+1)·t_tick = 1000 × 1 µs = 1 ms. Distractor (a) results from forgetting the +1 in ARR; (c) from forgetting the prescaler."},
+
+ {diff:"Easy",
+  q:"A PWM channel uses f_clk = 16 MHz, PSC = 0, ARR = 999 and CCR = 250. The output frequency and duty cycle are:",
+  opts:["16 kHz, 25 %","16 kHz, 75 %","1.6 kHz, 25 %","160 kHz, 25 %"], ans:0,
+  exp:"f_PWM = f_clk/[(PSC+1)(ARR+1)] = 16 MHz/1000 = 16 kHz. Duty = CCR/(ARR+1) = 250/1000 = 25 %. Option (b) is the result of using PWM mode 2 (inverted output), a classic trap."},
+
+ {diff:"Moderate",
+  q:"A 16-bit timer with f_clk = 16 MHz must produce a 1 second periodic interrupt. Which (PSC, ARR) pair is valid?",
+  opts:["PSC = 255, ARR = 62499","PSC = 0, ARR = 16000000","PSC = 1000, ARR = 999","PSC = 65535, ARR = 65535"], ans:0,
+  exp:"With PSC = 255, t_tick = 256/16 MHz = 16 µs. Required counts = 1 s / 16 µs = 62500 → ARR = 62500 − 1 = 62499, which fits in 16 bits (max 65535). Option (b) needs ARR = 16 000 000, which does not fit in a 16-bit register — the most common mistake in this type of problem."},
+
+ {diff:"Moderate",
+  q:"A timer with f_clk = 8 MHz and PSC = 3 is used in input-capture mode. Two consecutive rising-edge captures give CAP1 = 1200 and CAP2 = 5400 (no counter wrap). The input frequency is approximately:",
+  opts:["238 Hz","476 Hz","952 Hz","1905 Hz"], ans:1,
+  exp:"t_tick = (3+1)/8 MHz = 0.5 µs. ΔN = 4200 counts → T = 4200 × 0.5 µs = 2.1 ms → f = 1/2.1 ms = 476.19 Hz. Option (a) comes from forgetting that PSC = 3 gives a division by 4, not by 3."},
+
+ {diff:"Moderate",
+  q:"Which statement about the timer prescaler is CORRECT?",
+  opts:[
+    "Increasing the prescaler improves both range and resolution",
+    "Increasing the prescaler extends the range but degrades the resolution",
+    "The prescaler does not affect the resolution",
+    "The prescaler affects only PWM duty cycle, not period"],
+  ans:1,
+  exp:"The tick period is (PSC+1)/f_clk. A larger PSC makes each tick longer, so the maximum interval (range) grows, but the smallest resolvable interval (resolution) also grows — resolution gets worse. Range and resolution trade off against each other."},
+
+ {diff:"Moderate",
+  q:"Compared with edge-aligned PWM using identical PSC and ARR, centre-aligned PWM produces:",
+  opts:[
+    "Twice the output frequency and more harmonics",
+    "Approximately half the output frequency and lower harmonic content",
+    "The same frequency but a fixed 50 % duty",
+    "Half the frequency and a fixed 50 % duty"],
+  ans:1,
+  exp:"In centre-aligned mode the counter ramps up to ARR and back down to 0, so one PWM period contains two ramps; the period is therefore roughly twice as long (frequency roughly halved). The symmetric waveform reduces low-order harmonics, which is why centre-aligned PWM is preferred in motor drives. Duty is still set by CCR — it is not fixed at 50 %."},
+
+ {diff:"Easy",
+  q:"In the standard linker memory map of an ARM Cortex-M application, uninitialised global variables are placed in:",
+  opts:[".text",".rodata",".data",".bss"], ans:3,
+  exp:"Uninitialised (or zero-initialised) globals and statics go to <code>.bss</code>, which is zeroed at start-up and occupies no Flash. Initialised globals go to <code>.data</code> (which costs both Flash and RAM), code goes to <code>.text</code>, and constants go to <code>.rodata</code>."},
+
+ {diff:"Moderate",
+  q:"On an ARM Cortex-M processor, the main stack is:",
+  opts:[
+    "Full-descending: the stack pointer is decremented before a push",
+    "Empty-ascending: the stack pointer is incremented before a push",
+    "Full-ascending: the stack pointer is incremented after a push",
+    "Empty-descending: the stack pointer is decremented after a push"],
+  ans:0,
+  exp:"ARM Cortex-M uses a full-descending stack: a push first decrements the stack pointer and then stores the value. It grows from high addresses toward low addresses, i.e. downward in the memory map."},
+
+ {diff:"Moderate",
+  q:"An embedded system has been running for several days and an allocation that previously succeeded now fails, even though the total amount of free heap memory is still large. The most likely cause is:",
+  opts:["A memory leak","External heap fragmentation","Stack overflow","Flash wear-out"], ans:1,
+  exp:"If total free memory is large but the allocation still fails, the free space is split into small non-contiguous blocks — external fragmentation. A leak would reduce total free memory. Stack overflow corrupts data rather than causing an allocation failure. Flash wear-out is unrelated to heap allocation."},
+
+ {diff:"Difficult",
+  q:"An MCU has 20 KB of SRAM. The linker report gives .data = 1.5 KB, .bss = 6.2 KB; the design reserves a 4 KB heap pool and a 2 KB stack. The free RAM remaining is:",
+  opts:["4.3 KB","5.5 KB","6.3 KB","8.3 KB"], ans:2,
+  exp:"Used = 1.5 + 6.2 + 4.0 + 2.0 = 13.7 KB. Free = 20 − 13.7 = 6.3 KB (31.5 % headroom). Note that heap and stack figures are reservations, not measured peaks, so the real margin must be verified with stack painting and heap peak instrumentation."},
+
+ {diff:"Moderate",
+  q:"A variable is modified inside an ISR and read inside the main loop. To guarantee that the main loop observes every update, the variable must be declared:",
+  opts:["const","static","volatile","register"], ans:2,
+  exp:"<code>volatile</code> tells the compiler that the value may change at any time outside the normal flow of control, so it must not cache the value in a register or optimise away repeated reads. <code>const</code> makes it read-only, <code>static</code> only affects linkage/lifetime, and <code>register</code> is a hint that is usually ignored. Note that <code>volatile</code> gives no atomicity for multi-byte data."},
+
+ {diff:"Difficult",
+  q:"On a Cortex-M7, a DMA transfer writes into an SRAM buffer that is also read by the CPU, and the data occasionally appears stale or corrupted. The most appropriate fix is to:",
+  opts:[
+    "Increase the DMA priority",
+    "Place the buffer in a non-cacheable memory region, or clean/invalidate the cache around the transfer",
+    "Disable all interrupts during the transfer",
+    "Move the buffer into Flash"],
+  ans:1,
+  exp:"The problem is cache coherency: DMA bypasses the data cache, so the CPU can read a stale cached copy or write back dirty lines over fresh DMA data. The cleanest fix is a non-cacheable region (via the MPU or a dedicated SRAM bank); otherwise the cache must be cleaned before a transmit and invalidated after a receive, with cache-line alignment. Disabling interrupts does not fix coherency, and Flash is not writable by DMA."}
+];
+
+const TOPIC_Q = [
+ {diff:"Easy",
+  q:"In an up-counting timer, an update (overflow) event occurs when the counter:",
+  opts:["equals CCR","reaches ARR and wraps to 0","is reset by software only","equals half of ARR"],
+  ans:1,
+  exp:"The update event is generated when the counter reaches the auto-reload value ARR and reloads to 0 (in up-counting mode). Reaching CCR generates a compare event, which is a different flag and a different interrupt source."},
+
+ {diff:"Easy",
+  q:"A timer is clocked at 8 MHz with PSC = 7. The resulting counter clock frequency is:",
+  opts:["8 MHz","4 MHz","1 MHz","0.125 MHz"], ans:2,
+  exp:"f_tick = f_clk/(PSC+1) = 8 MHz/8 = 1 MHz. The common error is to divide by PSC instead of (PSC+1), which would give 1.143 MHz."},
+
+ {diff:"Easy",
+  q:"Which register directly controls the duty cycle in PWM mode?",
+  opts:["PSC","CNT","ARR","CCR"], ans:3,
+  exp:"The capture/compare register CCR sets the number of ticks for which the output is active, so duty = CCR/(ARR+1). ARR sets the period (and hence the frequency), PSC sets the tick size, and CNT is the running counter."},
+
+ {diff:"Moderate",
+  q:"Input-capture mode on a timer is primarily used to:",
+  opts:[
+    "Generate a PWM output",
+    "Measure the timing of an external signal",
+    "Divide the system clock",
+    "Store configuration data"],
+  ans:1,
+  exp:"Input capture latches the counter value into CCR on an external edge, which lets firmware measure pulse width, period, frequency or duty cycle with tick-level accuracy. Generating PWM is the job of output-compare mode."},
+
+ {diff:"Easy",
+  q:"Which memory section stores initialised global variables?",
+  opts:[".text",".rodata",".data",".bss"], ans:2,
+  exp:"Initialised globals and statics live in <code>.data</code>. Their initial values are stored in Flash and copied to RAM during start-up, so they consume both Flash and RAM. <code>.bss</code> holds zero-initialised data and consumes RAM only."},
+
+ {diff:"Easy",
+  q:"On an ARM Cortex-M processor, the stack grows:",
+  opts:[
+    "Upward, toward higher addresses",
+    "Downward, toward lower addresses",
+    "It does not grow; it is fixed",
+    "Upward, and the heap also grows upward"],
+  ans:1,
+  exp:"Cortex-M uses a full-descending stack that grows downward from the top of RAM toward lower addresses, while the heap grows upward from the end of <code>.bss</code>. They therefore grow toward each other, and a collision corrupts data."},
+
+ {diff:"Moderate",
+  q:"The main reason dynamic memory allocation (<code>malloc</code>) is avoided in safety-critical firmware is:",
+  opts:[
+    "It uses too much Flash",
+    "Its execution time is non-deterministic and it can fragment",
+    "It is slower than stack allocation but completely predictable",
+    "It is not supported by C compilers"],
+  ans:1,
+  exp:"<code>malloc</code> has an unbounded worst-case execution time and can fragment the heap over long runtimes, both of which break real-time and safety guarantees. MISRA C and standards such as DO-178C restrict or forbid it. Performance predictability, not speed, is the key issue."},
+
+ {diff:"Moderate",
+  q:"The primary purpose of a watchdog timer is to:",
+  opts:[
+    "Generate the system clock",
+    "Measure external pulse widths",
+    "Reset the MCU if firmware stops executing correctly",
+    "Increase the CPU clock frequency"],
+  ans:2,
+  exp:"A watchdog is an independent timer that must be refreshed periodically by firmware. If the firmware hangs, crashes or enters an unexpected loop and fails to refresh it, the watchdog expires and resets the MCU, restoring normal operation."},
+
+ {diff:"Moderate",
+  q:"A 16-bit timer with f_clk = 16 MHz has PSC = 15 and ARR = 9999. The update period is:",
+  opts:["1 ms","10 ms","100 ms","1 s"], ans:1,
+  exp:"t_tick = (15+1)/16 MHz = 1 µs. T = (ARR+1) × t_tick = 10 000 × 1 µs = 10 ms. Option (a) results from using ARR instead of (ARR+1) or from a factor-of-ten slip."},
+
+ {diff:"Difficult",
+  q:"Compared with edge-aligned PWM using the same PSC and ARR, centre-aligned PWM typically:",
+  opts:[
+    "Doubles the PWM frequency and increases harmonics",
+    "Halves the PWM frequency and produces a more symmetric, lower-harmonic waveform",
+    "Keeps the frequency the same but fixes the duty at 50 %",
+    "Has no effect on frequency or harmonics"],
+  ans:1,
+  exp:"In centre-aligned mode the counter counts up to ARR and back down to zero, so one PWM period contains two ramps — roughly doubling the period and halving the frequency. The symmetric waveform suppresses low-order harmonics, which is why it is preferred in motor control. Duty remains programmable through CCR."}
+];
+
+/* ============================================================
+   QUIZ ENGINE
+   ============================================================ */
+function letter(i){ return String.fromCharCode(65+i); }
+
+function renderQuiz(containerId, data, prefix){
+  const c = document.getElementById(containerId);
+  if(!c) return;
+  let html = "";
+  data.forEach(function(item, i){
+    html += '<div class="qcard" id="'+prefix+'-q'+i+'">';
+    html += '<p class="qtext"><span class="qnum">Q'+(i+1)+'.</span> '+item.q+
+            ' <span class="badge '+item.diff.toLowerCase()+'">'+item.diff+'</span></p>';
+    html += '<div class="opts">';
+    item.opts.forEach(function(o, j){
+      html += '<label class="opt"><input type="radio" name="'+prefix+'q'+i+'" value="'+j+'">'+
+              '<span><strong>'+letter(j)+'.</strong> '+o+'</span></label>';
+    });
+    html += '</div><div class="expl" id="'+prefix+'-e'+i+'"></div></div>';
+  });
+  c.innerHTML = html;
+}
+
+function checkQuiz(data, prefix, scoreId){
+  let score = 0, unanswered = 0;
+  data.forEach(function(item, i){
+    const sel  = document.querySelector('input[name="'+prefix+'q'+i+'"]:checked');
+    const card = document.getElementById(prefix+'-q'+i);
+    const ex   = document.getElementById(prefix+'-e'+i);
+    if(!card || !ex) return;
+    card.classList.remove('correct','wrong','skipped');
+
+    if(!sel){
+      unanswered++;
+      card.classList.add('skipped');
+      ex.innerHTML = '<strong>Not answered.</strong> Correct answer: <strong>'+letter(item.ans)+
+                     '</strong>. '+item.exp;
+      ex.style.display = 'block';
+      return;
+    }
+    const v = parseInt(sel.value, 10);
+    if(v === item.ans){
+      score++;
+      card.classList.add('correct');
+      ex.innerHTML = '<strong>✔ Correct.</strong> '+item.exp;
+    } else {
+      card.classList.add('wrong');
+      ex.innerHTML = '<strong>✘ Incorrect.</strong> Correct answer: <strong>'+letter(item.ans)+
+                     '</strong>. '+item.exp;
+    }
+    ex.style.display = 'block';
+  });
+
+  const total = data.length;
+  const pct = Math.round((score/total)*100);
+  const box = document.getElementById(scoreId);
+  box.innerHTML = 'Score: <strong>'+score+' / '+total+'</strong> &nbsp;('+pct+'%)'+
+                  ' &nbsp;•&nbsp; Unanswered: '+unanswered+
+                  (pct >= 80 ? ' &nbsp;— Excellent!' : pct >= 50 ? ' &nbsp;— Good, revise the misses.' :
+                   ' &nbsp;— Revise the module and try again.');
+  box.classList.add('show');
+}
+
+function resetQuiz(prefix, scoreId){
+  document.querySelectorAll('input[name^="'+prefix+'q"]').forEach(function(r){ r.checked = false; });
+  document.querySelectorAll('[id^="'+prefix+'-q"]').forEach(function(c){
+    c.classList.remove('correct','wrong','skipped');
+  });
+  document.querySelectorAll('[id^="'+prefix+'-e"]').forEach(function(e){
+    e.style.display = 'none';
+    e.innerHTML = '';
+  });
+  const box = document.getElementById(scoreId);
+  box.innerHTML = '';
+  box.classList.remove('show');
+}
+
+/* ============================================================
+   DOWNLOAD PAGE AS HTML
+   ============================================================ */
+function downloadPage(){
+  try{
+    const doctype = '<!DOCTYPE html>\n';
+    const html = doctype + document.documentElement.outerHTML;
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = 'Timers_and_Memory_Management_Embedded_Systems.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 3000);
+  }catch(e){
+    alert('Download is not supported in this browser. Use File > Save Page As instead.');
+  }
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', function(){
+  renderQuiz('gateQuiz',  GATE_Q,  'gq');
+  renderQuiz('topicQuiz', TOPIC_Q, 'tq');
+});
+</script>
+</body>
+</html>
